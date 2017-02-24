@@ -18,6 +18,24 @@
  *          and MessageHub forwards messages to the connected MessageClients.
  */
 class MessageHub {
+public:
+    MessageHub();
+    virtual ~MessageHub();
+
+    bool runAndForget();
+
+private:
+
+    Server communication_server;
+    BlockingMessageQueue message_queue;
+    SynchronizedChannelList channel_list;
+
+
+    bool startMessageRouterThread();
+    void startAcceptClients();
+    bool handleClientInSeparateThread(MessageChannel &channel);
+    static void* handleClientFunc(void* varg);
+    static void* routeMessagesFunc(void* varg);
 
     struct ClientFuncArg {
         ClientFuncArg(MessageChannel c, BlockingMessageQueue &q, SynchronizedChannelList &l) : channel(c), message_queue(q), channel_list(l)  {}
@@ -31,26 +49,6 @@ class MessageHub {
         BlockingMessageQueue &message_queue;
         SynchronizedChannelList &channel_list;
     };
-
-public:
-    MessageHub();
-    virtual ~MessageHub();
-
-    bool runAndForget();
-
-private:
-
-
-    Server communication_server;
-    BlockingMessageQueue message_queue;
-    SynchronizedChannelList channel_list;
-
-
-    bool startMessageRouterThread();
-    void startAcceptClients();
-    bool handleClientInSeparateThread(MessageChannel &channel);
-    static void* handleClientFunc(void* varg);
-    static void* routeMessagesFunc(void* varg);
 };
 
 #endif /* MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGEHUB_H_ */

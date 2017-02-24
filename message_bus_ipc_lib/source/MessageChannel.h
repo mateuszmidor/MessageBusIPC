@@ -25,6 +25,7 @@ public:
     bool operator!=(const MessageChannel& second) const { return socket_fd != second.socket_fd; }
 
     bool isValid() { return socket_fd > -1; }
+    bool connectToMessageHub();
     bool send(uint32_t id, const char *data, uint32_t size) const;
     bool receive(uint32_t &id, char *data, uint32_t &size, uint32_t max_size = MESSAGE_BUFF_SIZE) const;
 

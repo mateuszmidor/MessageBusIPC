@@ -35,6 +35,40 @@ MessageChannel& MessageChannel::operator=(const MessageChannel &second) {
     DEBUG_MSG("socket_fd %d", socket_fd);
     return *this;
 }
+
+/**
+ * @name    connectToMessageHub
+ * @brief   Connect to the central message hub; the hub must be already running before you call this function
+ * @return  True on successful connection, False otherwise
+ */
+bool MessageChannel::connectToMessageHub() {
+
+   // get a socket filedescriptor
+	socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+
+   // check socket for failure
+   if (socket_fd == -1) {
+      DEBUG_MSG("%s: socket(AF_UNIX, SOCK_STREAM, 0) failed", __FUNCTION__);
+      return false;
+   }
+
+   DEBUG_MSG("%s: connecting to MessageHub socket: %s...", __FUNCTION__, MESSAGE_HUB_SOCKET_FILENAME);
+      sockaddr_un remote;
+      remote.sun_family = AF_UNIX;
+      strcpy(remote.sun_path, MESSAGE_HUB_SOCKET_FILENAME);
+      size_t length = strlen(remote.sun_path) + sizeof(remote.sun_family);
+      if (connect(socket_fd, (sockaddr*)&remote, length) == -1) {
+         DEBUG_MSG("%s: connect failed", __FUNCTION__);
+         close(socket_fd);
+         socket_fd = -1; // not initialized
+         return false;
+      }
+   DEBUG_MSG("%s: done.", __FUNCTION__);
+
+   // success
+   return true;
+}
+
 /**
  * @name    send
  * @brief   Send a message over a socket

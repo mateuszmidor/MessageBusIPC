@@ -24,38 +24,10 @@ MessageClient::~MessageClient() {
 
 /**
  * @name    connectToMessageHub
- * @brief   Connect to the central message hub; the hub must be already running before you call this function
- * @return  True on successful connection, False otherwise
+ * @brief   Connect this client to central message hub
  */
 bool MessageClient::connectToMessageHub() {
-
-   // get a socket filedescriptor
-   int server_socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
-
-   // check socket for failure
-   if (server_socket_fd == -1) {
-      DEBUG_MSG("%s: socket(AF_UNIX, SOCK_STREAM, 0) failed", __FUNCTION__);
-      server_socket_fd = 0; // not initialized
-      return false;
-   }
-
-   DEBUG_MSG("%s: connecting to MessageHub socket: %s...", __FUNCTION__, MESSAGE_HUB_SOCKET_FILENAME);
-      sockaddr_un remote;
-      remote.sun_family = AF_UNIX;
-      strcpy(remote.sun_path, MESSAGE_HUB_SOCKET_FILENAME);
-      size_t length = strlen(remote.sun_path) + sizeof(remote.sun_family);
-      if (connect(server_socket_fd, (sockaddr*)&remote, length) == -1) {
-         DEBUG_MSG("%s: connect failed", __FUNCTION__);
-         close(server_socket_fd);
-         server_socket_fd = 0; // not initialized
-         return false;
-      }
-   DEBUG_MSG("%s: done.", __FUNCTION__);
-
-   server_channel = MessageChannel(server_socket_fd);
-
-   // success
-   return true;
+    return server_channel.connectToMessageHub();
 }
 
 /**
