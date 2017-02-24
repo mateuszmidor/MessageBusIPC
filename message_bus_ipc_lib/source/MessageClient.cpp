@@ -17,13 +17,9 @@
 #include "MessageClient.h"
 
 MessageClient::MessageClient() {
-    server_socket_fd = 0;
 }
 
 MessageClient::~MessageClient() {
-    // close the socket
-    if (server_socket_fd)
-       close(server_socket_fd);
 }
 
 /**
@@ -34,7 +30,7 @@ MessageClient::~MessageClient() {
 bool MessageClient::connectToMessageHub() {
 
    // get a socket filedescriptor
-   server_socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+   int server_socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
 
    // check socket for failure
    if (server_socket_fd == -1) {
@@ -56,6 +52,8 @@ bool MessageClient::connectToMessageHub() {
       }
    DEBUG_MSG("%s: done.", __FUNCTION__);
 
+   server_channel = MessageChannel(server_socket_fd);
+
    // success
    return true;
 }
@@ -67,13 +65,12 @@ bool MessageClient::connectToMessageHub() {
  * @note    This is a blocking method. Best called from a separate thread
  */
 void MessageClient::startListen(CallbackFunction callback) {
-    MessageChannel receiver(server_socket_fd);
     uint32_t message_id = 0;
     uint32_t size = 0;
     char *data = new char[MESSAGE_BUFF_SIZE];
 
     // reception loop
-    while (receiver.receive(message_id, data, size)) {
+    while (server_channel.receive(message_id, data, size)) {
         callback(message_id, data, size);
     }
 
@@ -86,8 +83,7 @@ void MessageClient::startListen(CallbackFunction callback) {
  * @brief   Send single message to the message hub
  */
 bool MessageClient::send(uint32_t message_id, const char *data, uint32_t size) const {
-    MessageChannel sender(server_socket_fd);
-    return sender.send(message_id, data, size);
+    return server_channel.send(message_id, data, size);
 }
 
 /**
@@ -96,6 +92,5 @@ bool MessageClient::send(uint32_t message_id, const char *data, uint32_t size) c
  * @note    This method should probably be removed as startListen is provided
  */
 bool MessageClient::receive(uint32_t &message_id, char *data, uint32_t &size) const {
-    MessageChannel receiver(server_socket_fd);
-    return receiver.receive(message_id, data, size);
+    return server_channel.receive(message_id, data, size);
 }

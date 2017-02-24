@@ -16,14 +16,25 @@
 #include "MessageChannel.h"
 
 MessageChannel::MessageChannel(int socket_fd) :
-        socket_fd(socket_fd) {
+    socket_fd(socket_fd) {
 }
 
 MessageChannel::~MessageChannel() {
-//    if (socket_fd)
+    //TODO: make channel a ref-counted resource and close the socket when no references
+//    if (socket_fd > -1)
 //        close(socket_fd);
 }
 
+MessageChannel::MessageChannel(const MessageChannel &second) {
+    socket_fd = second.socket_fd;//dup(second.socket_fd);
+    DEBUG_MSG("socket_fd %d", socket_fd);
+}
+
+MessageChannel& MessageChannel::operator=(const MessageChannel &second) {
+    socket_fd = second.socket_fd;//dup(second.socket_fd);
+    DEBUG_MSG("socket_fd %d", socket_fd);
+    return *this;
+}
 /**
  * @name    send
  * @brief   Send a message over a socket

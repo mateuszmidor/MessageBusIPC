@@ -37,9 +37,9 @@ public:
     SynchronizedChannelList();
     ~SynchronizedChannelList();
 
-    void add(int socket_fd);
+    void add(MessageChannel &channel);
     void remove(unsigned int index);
-    void removeByValue(int socket_fd);
+    void removeByValue(MessageChannel &channel);
     Iterator getIterator();
 
 private:

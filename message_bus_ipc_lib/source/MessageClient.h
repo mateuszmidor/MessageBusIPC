@@ -9,7 +9,7 @@
 #define MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGECLIENT_H_
 
 #include <stdint.h>
-
+#include "MessageChannel.h"
 
 /**
  * @class   MessageClient
@@ -27,7 +27,7 @@ public:
     bool receive(uint32_t &id, char *data, uint32_t &size) const;
 
 private:
-    int server_socket_fd;
+    MessageChannel server_channel;
 };
 
 #endif /* MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGECLIENT_H_ */

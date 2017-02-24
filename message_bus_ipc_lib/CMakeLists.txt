@@ -1,4 +1,5 @@
 add_library(MessageBusIpcLib
+            source/Server.cpp
             source/MessageHub.cpp
             source/MessageClient.cpp
             source/MessageChannel.cpp

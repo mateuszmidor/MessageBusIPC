@@ -65,13 +65,13 @@ SynchronizedChannelList::~SynchronizedChannelList() {
 
 /**
  * @name    add
- * @param   socket_fd Socked file descriptor to build a MessageChannel from
+ * @param   channel
  * @note    Thread safe add/remove/iterate
  */
-void SynchronizedChannelList::add(int socket_fd) {
+void SynchronizedChannelList::add(MessageChannel &channel) {
     PThreadLockGuard lock(channels_mutex);
 
-    channels.push_back(MessageChannel(socket_fd));
+    channels.push_back(channel);
     DEBUG_MSG("%s: num channels: %d", __FUNCTION__, (int )channels.size());
 }
 
@@ -92,14 +92,13 @@ void SynchronizedChannelList::remove(unsigned int index) {
 
 /**
  * @name    removeByValue
- * @param   socket_fd Socket file descriptor of the MessageChannel to remove
+ * @param   channel MessageChannel to remove
  * @note    Thread safe add/remove/iterate
  */
-void SynchronizedChannelList::removeByValue(int socket_fd) {
+void SynchronizedChannelList::removeByValue(MessageChannel &channel) {
     PThreadLockGuard lock(channels_mutex);
 
-    MessageChannel channel_to_remove(socket_fd);
-    channels.erase(std::remove(channels.begin(), channels.end(), channel_to_remove), channels.end());
+    channels.erase(std::remove(channels.begin(), channels.end(), channel), channels.end());
     DEBUG_MSG("%s: num channels: %d", __FUNCTION__, (int )channels.size());
 }
 

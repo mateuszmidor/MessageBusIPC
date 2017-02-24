@@ -10,6 +10,7 @@
 
 #include "BlockingMessageQueue.h"
 #include "SynchronizedChannelList.h"
+#include "Server.h"
 
 /**
  * @class   MessageHub
@@ -19,8 +20,8 @@
 class MessageHub {
 
     struct ClientFuncArg {
-        ClientFuncArg(int fd, BlockingMessageQueue &q, SynchronizedChannelList &l) : socket_fd(fd), message_queue(q), channel_list(l)  {}
-        int socket_fd;
+        ClientFuncArg(MessageChannel c, BlockingMessageQueue &q, SynchronizedChannelList &l) : channel(c), message_queue(q), channel_list(l)  {}
+        MessageChannel channel;
         BlockingMessageQueue &message_queue;
         SynchronizedChannelList &channel_list;
     };
@@ -38,17 +39,16 @@ public:
     bool runAndForget();
 
 private:
-    const static int MAX_AWAITING_CONNECTIONS = 10;
 
-    int server_socket_fd;
+
+    Server communication_server;
     BlockingMessageQueue message_queue;
     SynchronizedChannelList channel_list;
 
-    bool prepareServerSocket();
-    void cleanupServerSocket();
+
     bool startMessageRouterThread();
     void startAcceptClients();
-    bool handleClientInSeparateThread(int socket_fd);
+    bool handleClientInSeparateThread(MessageChannel &channel);
     static void* handleClientFunc(void* varg);
     static void* routeMessagesFunc(void* varg);
 };
