@@ -9,6 +9,7 @@
 #define MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGECLIENT_H_
 
 #include <stdint.h>
+#include "PThreadLockGuard.h"
 #include "MessageChannel.h"
 
 /**
@@ -17,17 +18,20 @@
  */
 class MessageClient {
 public:
-    typedef void(*CallbackFunction)(uint32_t &id, char *data, uint32_t &size) ;
+    typedef bool(*CallbackFunction)(uint32_t &id, char *data, uint32_t &size) ;
+
     MessageClient();
     virtual ~MessageClient();
 
-    bool connectToMessageHub();
-    void startListen(CallbackFunction callback);
-    bool send(uint32_t id, const char *data, uint32_t size) const;
-    bool receive(uint32_t &id, char *data, uint32_t &size) const;
+    void initializeAndListen(CallbackFunction callback, bool auto_reconnect = true);
+    bool send(uint32_t id, const char *data, uint32_t size);
 
 private:
+    char *buffer;
     MessageChannel server_channel;
+    pthread_mutex_t mutex;
+    bool tryConnectToMessageHub();
+	bool listenUntilConnectionBroken(CallbackFunction callback);
 };
 
 #endif /* MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGECLIENT_H_ */

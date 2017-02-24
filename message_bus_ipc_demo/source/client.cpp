@@ -15,18 +15,19 @@
 
 using namespace std;
 
-void callback(uint32_t &id, char *data, uint32_t &size) {
+bool callback(uint32_t &id, char *data, uint32_t &size) {
     printf("%s\n", data);
+    return true;
 }
 
-void sendBunchOfMessages(const MessageClient& client, char** argv) {
+void sendBunchOfMessages( MessageClient& client, char** argv) {
     for (int i = 0; i < 10; i++) {
         client.send(50, argv[1], strlen(argv[1]) + 1); // +1 for null
         sleep(1);
     }
 }
 
-void startInteractiveSession(const MessageClient& client) {
+void startInteractiveSession(MessageClient& client) {
     string s;
     do {
         getline(cin, s);
@@ -36,10 +37,8 @@ void startInteractiveSession(const MessageClient& client) {
 
 int main(int argc, char** argv) {
     MessageClient client;
-    if (!client.connectToMessageHub())
-        return 1;
 
-    std::thread t([&client]() {client.startListen(callback);});
+    std::thread t([&client]() {client.initializeAndListen(callback);});
     t.detach();
 
     if (argc > 1)

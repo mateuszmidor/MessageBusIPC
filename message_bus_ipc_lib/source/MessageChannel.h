@@ -19,8 +19,6 @@ class MessageChannel {
 public:
     MessageChannel(int socket_fd = -1);
     ~MessageChannel();
-    MessageChannel(const MessageChannel &second);
-    MessageChannel& operator=(const MessageChannel &second);
     bool operator==(const MessageChannel& second) const { return socket_fd == second.socket_fd; }
     bool operator!=(const MessageChannel& second) const { return socket_fd != second.socket_fd; }
 

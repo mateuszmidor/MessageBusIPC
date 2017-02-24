@@ -25,23 +25,16 @@ MessageChannel::~MessageChannel() {
 //        close(socket_fd);
 }
 
-MessageChannel::MessageChannel(const MessageChannel &second) {
-    socket_fd = second.socket_fd;//dup(second.socket_fd);
-    DEBUG_MSG("socket_fd %d", socket_fd);
-}
-
-MessageChannel& MessageChannel::operator=(const MessageChannel &second) {
-    socket_fd = second.socket_fd;//dup(second.socket_fd);
-    DEBUG_MSG("socket_fd %d", socket_fd);
-    return *this;
-}
-
 /**
  * @name    connectToMessageHub
  * @brief   Connect to the central message hub; the hub must be already running before you call this function
  * @return  True on successful connection, False otherwise
  */
 bool MessageChannel::connectToMessageHub() {
+
+	// in case this is re-connection attempt - close old socket
+	if (socket_fd > -1)
+		close(socket_fd);
 
    // get a socket filedescriptor
 	socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
