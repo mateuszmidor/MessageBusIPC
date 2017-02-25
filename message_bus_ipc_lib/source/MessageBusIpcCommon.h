@@ -14,6 +14,9 @@ const char MESSAGE_HUB_SOCKET_FILENAME[] = "/tmp/sdars_ipc_hub";
 // Maximum size of single message in bytes
 const unsigned MESSAGE_BUFF_SIZE = 1024 * 1024 * 1; // 1MB
 
+// socket file descriptor that is not initialized
+const int UNINITIALIZED_SOCKET_FD = -1;
+
 // Debugging messages routine
 #ifndef NDEBUG
 #include <cstdio>

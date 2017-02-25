@@ -21,8 +21,8 @@ MessageChannel::MessageChannel(int socket_fd) :
 
 MessageChannel::~MessageChannel() {
     //TODO: make channel a ref-counted resource and close the socket when no references
-//    if (socket_fd > -1)
-//        close(socket_fd);
+    // if (isConnected())
+    //    disconnect();
 }
 
 /**
@@ -32,17 +32,17 @@ MessageChannel::~MessageChannel() {
  */
 bool MessageChannel::connectToMessageHub() {
 
-	// in case this is re-connection attempt - close old socket
-	if (socket_fd > -1)
-		close(socket_fd);
+	// in case this is re-connection attempt - close old connection
+	if (socket_fd != UNINITIALIZED_SOCKET_FD)
+        close(socket_fd);
 
    // get a socket filedescriptor
 	socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
 
    // check socket for failure
-   if (socket_fd == -1) {
-      DEBUG_MSG("%s: socket(AF_UNIX, SOCK_STREAM, 0) failed", __FUNCTION__);
-      return false;
+	if (socket_fd == UNINITIALIZED_SOCKET_FD) {
+        DEBUG_MSG("%s: socket(AF_UNIX, SOCK_STREAM, 0) failed, errno %d - %s", __FUNCTION__, errno, strerror(errno));
+        return false;
    }
 
    DEBUG_MSG("%s: connecting to MessageHub socket: %s...", __FUNCTION__, MESSAGE_HUB_SOCKET_FILENAME);
@@ -50,16 +50,25 @@ bool MessageChannel::connectToMessageHub() {
       remote.sun_family = AF_UNIX;
       strcpy(remote.sun_path, MESSAGE_HUB_SOCKET_FILENAME);
       size_t length = strlen(remote.sun_path) + sizeof(remote.sun_family);
-      if (connect(socket_fd, (sockaddr*)&remote, length) == -1) {
-         DEBUG_MSG("%s: connect failed", __FUNCTION__);
-         close(socket_fd);
-         socket_fd = -1; // not initialized
+	  if (connect(socket_fd, (sockaddr*) &remote, length) == -1) {
+         close(socket_fd);  // cleanup filedescriptor
+         socket_fd = UNINITIALIZED_SOCKET_FD; // status: uninitialized
+		 DEBUG_MSG("%s: connect failed, errno %d - %s", __FUNCTION__, errno, strerror(errno));
          return false;
       }
    DEBUG_MSG("%s: done.", __FUNCTION__);
 
    // success
    return true;
+}
+
+void MessageChannel::disconnect() {
+    close(socket_fd);
+    socket_fd = UNINITIALIZED_SOCKET_FD;
+}
+
+bool MessageChannel::isConnected() const {
+    return socket_fd != UNINITIALIZED_SOCKET_FD;
 }
 
 /**
@@ -72,18 +81,16 @@ bool MessageChannel::connectToMessageHub() {
  */
 bool MessageChannel::send(uint32_t message_id, const char *data, uint32_t size) const {
 
-//   std::lock_guard<std::mutex> guard(mtx);
-    if (!socket_fd) {
-        DEBUG_MSG("%s: socket_fd not initialized", __FUNCTION__);
+    // check connection
+    if (!isConnected()) {
+        DEBUG_MSG("%s: not connected to MessageHub", __FUNCTION__);
         return false;
     }
 
     // send the message
     if (!send_message(message_id, data, size)) {
-        DEBUG_MSG("%s: send_message failed", __FUNCTION__);
-        if (errno == EPIPE)
-            DEBUG_MSG("%s: errno: EPIPE (connection broken)", __FUNCTION__);
-        return false;
+    	DEBUG_MSG("%s: send_message failed, errno %d - %s", __FUNCTION__, errno, strerror(errno));
+		return false;
     }
 
     return true;
@@ -131,23 +138,16 @@ bool MessageChannel::send_buffer(const char *buf, uint32_t size) const {
  */
 bool MessageChannel::receive(uint32_t &message_id, char* buf, uint32_t &size, uint32_t max_size) const {
 
-    if (!socket_fd) {
-        DEBUG_MSG("%s: socket_fd not initialized", __FUNCTION__);
+    // check connection
+	if (!isConnected()) {
+        DEBUG_MSG("%s: Not connected to MessageHub", __FUNCTION__);
         return false;
     }
 
     // send the message
     if (!receive_message(message_id, buf, size, max_size)) {
-        switch (errno) {
-        case 0:
-            return false;
-        case EPIPE:
-            DEBUG_MSG("%s: receive_message failed, errno: EPIPE (connection broken)", __FUNCTION__);
-            return false;
-        default:
-            DEBUG_MSG("%s: receive_message failed, errno: %d", __FUNCTION__, errno);
-            return false;
-        }
+    	DEBUG_MSG("%s: receive_message terminated, errno %d - %s", __FUNCTION__, errno, strerror(errno));
+		return false;
     }
 
     return true;

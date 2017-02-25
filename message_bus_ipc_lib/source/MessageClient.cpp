@@ -41,7 +41,7 @@ void MessageClient::initializeAndListen(CallbackFunction callback, bool auto_rec
     		auto_reconnect &= listenUntilConnectionBroken(callback);
 
     	// 2. sleep a while and maybe reconnect and listen again
-		sleep(1);
+		sleep (RECONNECT_DELAY_SECONDS);
     } while (auto_reconnect);
 
     DEBUG_MSG("%s: finished listening to incoming messages.", __FUNCTION__);

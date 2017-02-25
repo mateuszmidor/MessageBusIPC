@@ -30,6 +30,8 @@ private:
     char *buffer;
     MessageChannel server_channel;
     pthread_mutex_t mutex;
+	static const int RECONNECT_DELAY_SECONDS = 3;
+
     bool tryConnectToMessageHub();
 	bool listenUntilConnectionBroken(CallbackFunction callback);
 };

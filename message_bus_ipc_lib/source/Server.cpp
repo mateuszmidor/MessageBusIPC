@@ -17,7 +17,7 @@
 #include "MessageChannel.h"
 #include "Server.h"
 
-Server::Server(): server_socket_fd(-1) {
+Server::Server(): server_socket_fd(UNINITIALIZED_SOCKET_FD) {
 }
 
 Server::~Server() {
@@ -46,9 +46,9 @@ MessageChannel Server::acceptOne() {
     // repeat until success
     do {
         client_socket_fd = accept(server_socket_fd, (sockaddr*) &remote, &remote_length);
-        if (client_socket_fd == -1)
-            DEBUG_MSG("%s: accept failed", __FUNCTION__);
-    } while (client_socket_fd == -1);
+        if (client_socket_fd == UNINITIALIZED_SOCKET_FD)
+            DEBUG_MSG("%s: accept failed, errno %d - %s", __FUNCTION__, errno, strerror(errno));
+    } while (client_socket_fd == UNINITIALIZED_SOCKET_FD);
 
     return MessageChannel(client_socket_fd);
 }
@@ -66,8 +66,8 @@ bool Server::prepareServerSocket() {
     server_socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
 
     // check socket for failure
-    if (server_socket_fd == -1) {
-        DEBUG_MSG("%s: socket(AF_UNIX, SOCK_STREAM, 0) failed", __FUNCTION__);
+    if (server_socket_fd == UNINITIALIZED_SOCKET_FD) {
+        DEBUG_MSG("%s: socket(AF_UNIX, SOCK_STREAM, 0) failed, errno %d - %s", __FUNCTION__, errno, strerror(errno));
         return false;
     }
 
@@ -80,16 +80,18 @@ bool Server::prepareServerSocket() {
         // bind socket to address in UNIX domain
         size_t local_length = strlen(local.sun_path) + sizeof(local.sun_family);
         if (bind(server_socket_fd, (sockaddr*) &local, local_length) == -1) {
-            DEBUG_MSG("%s: bind failed with errno %d", __FUNCTION__, errno);
-            close(server_socket_fd);
+            DEBUG_MSG("%s: bind failed, errno %d - %s", __FUNCTION__, errno, strerror(errno));
+            close(server_socket_fd); // cleanup socket filedescriptor
+            server_socket_fd = UNINITIALIZED_SOCKET_FD; // status: uninitialized
             return false;
         }
     DEBUG_MSG("%s: done.", __FUNCTION__);
 
     // mark socket as listening socket
     if (listen(server_socket_fd, MAX_AWAITING_CONNECTIONS) == -1) {
-        DEBUG_MSG("%s: listen failed with errno %d", __FUNCTION__, errno);
-        close(server_socket_fd);
+        DEBUG_MSG("%s: listen failed, errno %d - %s", __FUNCTION__, errno, strerror(errno));
+        close(server_socket_fd); // cleanup socket filedescriptor
+        server_socket_fd = UNINITIALIZED_SOCKET_FD; // status: uninitialized
         return false;
     }
 
@@ -103,9 +105,9 @@ bool Server::prepareServerSocket() {
  */
 void Server::cleanupServerSocket() {
     // close the listening socket
-    if (server_socket_fd > -1) {
+    if (server_socket_fd != UNINITIALIZED_SOCKET_FD) {
         close(server_socket_fd);
-        server_socket_fd = 0;
+        server_socket_fd = UNINITIALIZED_SOCKET_FD;
     }
 
     // remove socket file

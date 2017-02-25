@@ -22,7 +22,6 @@ public:
     bool operator==(const MessageChannel& second) const { return socket_fd == second.socket_fd; }
     bool operator!=(const MessageChannel& second) const { return socket_fd != second.socket_fd; }
 
-    bool isValid() { return socket_fd > -1; }
     bool connectToMessageHub();
     bool send(uint32_t id, const char *data, uint32_t size) const;
     bool receive(uint32_t &id, char *data, uint32_t &size, uint32_t max_size = MESSAGE_BUFF_SIZE) const;
@@ -35,6 +34,9 @@ private:
 
     bool receive_message(uint32_t &id, char* buf, uint32_t &size, uint32_t max_size) const;
     bool receive_buffer(char* buf, uint32_t size) const;
+
+    bool isConnected() const;
+    void disconnect();
 };
 
 #endif /* MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGECHANNEL_H_ */
