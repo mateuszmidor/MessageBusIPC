@@ -1,5 +1,5 @@
 /**
- *   @file: Server.cpp
+ *   @file: MessageServer.cpp
  *
  *   @date: Feb 24, 2017
  * @author: Mateusz Midor
@@ -15,13 +15,13 @@
 
 #include "MessageBusIpcCommon.h"
 #include "MessageChannel.h"
-#include "Server.h"
+#include "MessageServer.h"
 
-Server::Server() :
+MessageServer::MessageServer() :
         server_socket_fd(UNINITIALIZED_SOCKET_FD) {
 }
 
-Server::~Server() {
+MessageServer::~MessageServer() {
     cleanupServerSocket();
 }
 
@@ -30,7 +30,7 @@ Server::~Server() {
  * @brief   Run init before you start accepting clients
  * @return  True on success, False otherwise
  */
-bool Server::init() {
+bool MessageServer::init() {
     return prepareServerSocket();
 }
 
@@ -39,7 +39,7 @@ bool Server::init() {
  * @return  MessageChannel that allows communication with accepted client
  * @note    This is blocking function. Best run in dedicated thread
  */
-MessageChannel Server::acceptOne() {
+MessageChannel MessageServer::acceptOne() {
     sockaddr_un remote;
     unsigned remote_length = sizeof(remote);
     int client_socket_fd;
@@ -58,7 +58,7 @@ MessageChannel Server::acceptOne() {
  * @brief   Initialize listening server socket that will be used to accept clients
  * @return  True on success, False otherwise
  */
-bool Server::prepareServerSocket() {
+bool MessageServer::prepareServerSocket() {
 
     // delete socket file if such already exists
     unlink(MESSAGE_HUB_SOCKET_FILENAME);
@@ -104,7 +104,7 @@ bool Server::prepareServerSocket() {
  * @name    cleanupServerSocket
  * @brief   Get rid of the listening server socket and the backing socket file
  */
-void Server::cleanupServerSocket() {
+void MessageServer::cleanupServerSocket() {
     // close the listening socket
     if (server_socket_fd != UNINITIALIZED_SOCKET_FD) {
         close(server_socket_fd);

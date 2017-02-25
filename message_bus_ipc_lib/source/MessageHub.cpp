@@ -24,7 +24,7 @@ MessageHub::~MessageHub() {
  */
 bool MessageHub::runAndForget() {
     // 1. prepare listening server
-    if (!communication_server.init())
+    if (!server.init())
         return false;
 
     // 2. start thread that will route the incoming messages to clients
@@ -72,7 +72,7 @@ void MessageHub::startAcceptClients() {
         DEBUG_MSG("%s: listening for incoming connection...", __FUNCTION__);
 
         // 1. accept new communication channel
-        MessageChannel channel = communication_server.acceptOne();
+        MessageChannel channel = server.acceptOne();
 
         // 2. put it on the list so the router function knows about it
         channel_list.add(channel);
@@ -152,7 +152,7 @@ void* MessageHub::routeMessagesFunc(void* varg) {
 
     while (true) {
         arg->message_queue.pop(sender, message_id, data, size);
-        SynchronizedChannelList::Iterator it = arg->channel_list.getIterator();
+        ThreadsafeChannelList::Iterator it = arg->channel_list.getIterator();
 
         while ((recipient = it.getNext()))
             if (*recipient != sender) // dont send the message back to sender

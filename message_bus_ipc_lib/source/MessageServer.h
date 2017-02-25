@@ -1,22 +1,22 @@
 /**
- *   @file: Server.h
+ *   @file: MessageServer.h
  *
  *   @date: Feb 24, 2017
  * @author: Mateusz Midor
  */
 
-#ifndef MESSAGE_BUS_IPC_LIB_SOURCE_SERVER_H_
-#define MESSAGE_BUS_IPC_LIB_SOURCE_SERVER_H_
+#ifndef MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGESERVER_H_
+#define MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGESERVER_H_
 
 #include "MessageChannel.h"
 /**
- * @class   Server
+ * @class   MessageServer
  * @brief   Server awaits incoming connections and return them as MessageChannels
  */
-class Server {
+class MessageServer {
 public:
-    Server();
-    virtual ~Server();
+    MessageServer();
+    virtual ~MessageServer();
 
     bool init();
     MessageChannel acceptOne();
@@ -29,4 +29,4 @@ private:
     void cleanupServerSocket();
 };
 
-#endif /* MESSAGE_BUS_IPC_LIB_SOURCE_SERVER_H_ */
+#endif /* MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGESERVER_H_ */

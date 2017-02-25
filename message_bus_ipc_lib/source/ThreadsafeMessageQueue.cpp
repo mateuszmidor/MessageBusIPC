@@ -1,15 +1,16 @@
 /**
- *   @file: BlockingMessageQueue.cpp
+ *   @file: ThreadsafeMessageQueue.cpp
  *
  *   @date: Feb 23, 2017
  * @author: Mateusz Midor
  */
 
+#include "ThreadsafeMessageQueue.h"
+
 #include <string.h>
 #include "MessageBusIpcCommon.h"
-#include "BlockingMessageQueue.h"
 
-BlockingMessageQueue::BlockingMessageQueue() {
+ThreadsafeMessageQueue::ThreadsafeMessageQueue() {
     pthread_mutex_init(&push_pop_mutex, NULL);
     pthread_cond_init(&queue_not_empty, NULL);
     pthread_cond_init(&queue_not_full, NULL);
@@ -20,7 +21,7 @@ BlockingMessageQueue::BlockingMessageQueue() {
     data_in_buff = false;
 }
 
-BlockingMessageQueue::~BlockingMessageQueue() {
+ThreadsafeMessageQueue::~ThreadsafeMessageQueue() {
     pthread_mutex_destroy(&push_pop_mutex);
     pthread_cond_destroy(&queue_not_empty);
     pthread_cond_destroy(&queue_not_full);
@@ -32,7 +33,7 @@ BlockingMessageQueue::~BlockingMessageQueue() {
  * @brief   This function copies from data to the queue internal storage
  * @note    Thread safe
  */
-void BlockingMessageQueue::push(const MessageChannel &sender, uint32_t message_id, const char *data, uint32_t size) {
+void ThreadsafeMessageQueue::push(const MessageChannel &sender, uint32_t message_id, const char *data, uint32_t size) {
     pthread_mutex_lock(&push_pop_mutex);
 
     // wait until there is free space in the queue
@@ -56,7 +57,7 @@ void BlockingMessageQueue::push(const MessageChannel &sender, uint32_t message_i
  * @brief   This function copies from the queue internal storage to data
  * @note    Thread safe
  */
-void BlockingMessageQueue::pop(MessageChannel &sender, uint32_t &message_id, char *data, uint32_t &size) {
+void ThreadsafeMessageQueue::pop(MessageChannel &sender, uint32_t &message_id, char *data, uint32_t &size) {
     pthread_mutex_lock(&push_pop_mutex);
 
     // wait until there is data in the queue

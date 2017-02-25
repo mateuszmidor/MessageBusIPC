@@ -1,30 +1,31 @@
 /**
- *   @file: SynchronizedChannelList.cpp
+ *   @file: ThreadsafeChannelList.cpp
  *
  *   @date: Feb 23, 2017
  * @author: Mateusz Midor
  */
 
+#include "ThreadsafeChannelList.h"
+
 #include <algorithm>
 #include "MessageBusIpcCommon.h"
 #include "PThreadLockGuard.h"
-#include "SynchronizedChannelList.h"
 
 /**
  * Iterator Constructor.
  * @param   channels MessageChannel list to iterate over
- * @param   mutex SynchronizedChannelList add/remove/iterate synchronization mutex
- * @brief   channellist_lock locks the mutex, so add/remove operations of SynchronizedChannelList are blocked
+ * @param   mutex ThreadsafeChannelList add/remove/iterate synchronization mutex
+ * @brief   channellist_lock locks the mutex, so add/remove operations of ThreadsafeChannelList are blocked
  */
-SynchronizedChannelList::Iterator::Iterator(std::vector<MessageChannel> &channels, pthread_mutex_t &mutex) :
+ThreadsafeChannelList::Iterator::Iterator(std::vector<MessageChannel> &channels, pthread_mutex_t &mutex) :
         channels(channels), current_position(0), channellist_lock(mutex) {
 }
 
 /**
  * Iterator Destructor.
  */
-SynchronizedChannelList::Iterator::~Iterator() {
-    // channellist_lock gets destroyed and unlocks the mutex, so add/remove operations of SynchronizedChannelList get unlocked
+ThreadsafeChannelList::Iterator::~Iterator() {
+    // channellist_lock gets destroyed and unlocks the mutex, so add/remove operations of ThreadsafeChannelList get unlocked
 }
 
 /**
@@ -32,7 +33,7 @@ SynchronizedChannelList::Iterator::~Iterator() {
  * @brief   Get MessageChannel pointer and advance the iterator
  * @return  MessageChannel pointer if iterating not done yet, NULL otherwise
  */
-MessageChannel const* SynchronizedChannelList::Iterator::getNext() {
+MessageChannel const* ThreadsafeChannelList::Iterator::getNext() {
     if (current_position == channels.size())
         return NULL;
 
@@ -40,18 +41,18 @@ MessageChannel const* SynchronizedChannelList::Iterator::getNext() {
 }
 
 /**
- * SynchronizedChannelList Constructor.
+ * ThreadsafeChannelList Constructor.
  * @brief   Initialize the add/remove/iterate mutex
  */
-SynchronizedChannelList::SynchronizedChannelList() {
+ThreadsafeChannelList::ThreadsafeChannelList() {
     pthread_mutex_init(&channels_mutex, NULL);
 }
 
 /**
- * SynchronizedChannelList Destructor.
+ * ThreadsafeChannelList Destructor.
  * @brief   Get rid of the add/remove/iterate mutex
  */
-SynchronizedChannelList::~SynchronizedChannelList() {
+ThreadsafeChannelList::~ThreadsafeChannelList() {
     pthread_mutex_destroy(&channels_mutex);
 }
 
@@ -60,7 +61,7 @@ SynchronizedChannelList::~SynchronizedChannelList() {
  * @param   channel
  * @note    Thread safe add/remove/iterate
  */
-void SynchronizedChannelList::add(MessageChannel &channel) {
+void ThreadsafeChannelList::add(MessageChannel &channel) {
     PThreadLockGuard lock(channels_mutex);
 
     channels.push_back(channel);
@@ -72,7 +73,7 @@ void SynchronizedChannelList::add(MessageChannel &channel) {
  * @param   index Index of item on the list to remove
  * @note    Thread safe add/remove/iterate
  */
-void SynchronizedChannelList::remove(unsigned int index) {
+void ThreadsafeChannelList::remove(unsigned int index) {
     PThreadLockGuard lock(channels_mutex);
 
     if (index >= channels.size())
@@ -87,7 +88,7 @@ void SynchronizedChannelList::remove(unsigned int index) {
  * @param   channel MessageChannel to remove
  * @note    Thread safe add/remove/iterate
  */
-void SynchronizedChannelList::removeByValue(MessageChannel &channel) {
+void ThreadsafeChannelList::removeByValue(MessageChannel &channel) {
     PThreadLockGuard lock(channels_mutex);
 
     channels.erase(std::remove(channels.begin(), channels.end(), channel), channels.end());
@@ -99,6 +100,6 @@ void SynchronizedChannelList::removeByValue(MessageChannel &channel) {
  * @return  MessageChannel iterator
  * @note    Thread safe add/remove/iterate
  */
-SynchronizedChannelList::Iterator SynchronizedChannelList::getIterator() {
+ThreadsafeChannelList::Iterator ThreadsafeChannelList::getIterator() {
     return Iterator(channels, channels_mutex);
 }
