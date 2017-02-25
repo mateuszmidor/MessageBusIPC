@@ -5,12 +5,10 @@
  * @author: Mateusz Midor
  */
 
-
 #include <pthread.h>
 #include "MessageBusIpcCommon.h"
 #include "MessageChannel.h"
 #include "MessageHub.h"
-
 
 MessageHub::MessageHub() {
 }
@@ -21,7 +19,7 @@ MessageHub::~MessageHub() {
 /**
  * @name    runAndForget
  * @brief   Run the MessageHub and forget about it
- * @return  true if successfuly listened for clients, false otherwise
+ * @return  true if successfuly initialized and run, false otherwise
  * @note    This is blocking method. Best called from separate thread
  */
 bool MessageHub::runAndForget() {
@@ -49,7 +47,7 @@ bool MessageHub::startMessageRouterThread() {
     int return_code;
 
     RouterFuncArg *arg = new RouterFuncArg(message_queue, channel_list);
-    return_code = pthread_create(&thread, NULL, MessageHub::routeMessagesFunc, (void*)arg);
+    return_code = pthread_create(&thread, NULL, MessageHub::routeMessagesFunc, (void*) arg);
     if (return_code) {
         DEBUG_MSG("%s: pthread_create failed with error code: %d", __FUNCTION__, return_code);
         return false;
@@ -81,7 +79,7 @@ void MessageHub::startAcceptClients() {
 
         // 3. handle the client in separate thread
         if (!handleClientInSeparateThread(channel))
-            DEBUG_MSG("%s: handleClient failed", __FUNCTION__);
+            DEBUG_MSG("%s: handleClientInSeparateThread failed", __FUNCTION__);
     }
 }
 
@@ -96,7 +94,7 @@ bool MessageHub::handleClientInSeparateThread(MessageChannel &channel) {
     int return_code;
 
     ClientFuncArg *arg = new ClientFuncArg(channel, message_queue, channel_list);
-    return_code = pthread_create(&thread, NULL, MessageHub::handleClientFunc, (void*)arg);
+    return_code = pthread_create(&thread, NULL, MessageHub::handleClientFunc, (void*) arg);
     if (return_code) {
         DEBUG_MSG("%s: pthread_create failed with error code: %d", __FUNCTION__, return_code);
         return false;
@@ -118,7 +116,7 @@ bool MessageHub::handleClientInSeparateThread(MessageChannel &channel) {
  * @note    This is run in a dedicated thread
  */
 void* MessageHub::handleClientFunc(void* varg) {
-    ClientFuncArg *arg = (ClientFuncArg*)varg;
+    ClientFuncArg *arg = (ClientFuncArg*) varg;
 
     MessageChannel channel = arg->channel;
     uint32_t message_id;
@@ -126,13 +124,12 @@ void* MessageHub::handleClientFunc(void* varg) {
     char *data = new char[MESSAGE_BUFF_SIZE];
 
     while (channel.receive(message_id, data, size)) {
-        DEBUG_MSG("received message %s", data);
+        DEBUG_MSG("received message with id %d, size %d", message_id, size);
         arg->message_queue.push(channel, message_id, data, size);
     }
     DEBUG_MSG("%s", "Client disconnect.");
 
     arg->channel_list.removeByValue(channel);
-
     delete[] data;
     delete arg;
     return NULL;
@@ -145,7 +142,7 @@ void* MessageHub::handleClientFunc(void* varg) {
  * @note    This is run in a dedicated thread
  */
 void* MessageHub::routeMessagesFunc(void* varg) {
-    RouterFuncArg *arg = (RouterFuncArg*)varg;
+    RouterFuncArg *arg = (RouterFuncArg*) varg;
 
     MessageChannel sender;
     MessageChannel const * recipient;

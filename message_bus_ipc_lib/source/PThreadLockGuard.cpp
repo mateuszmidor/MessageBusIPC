@@ -7,7 +7,8 @@
 
 #include "PThreadLockGuard.h"
 
-PThreadLockGuard::PThreadLockGuard(pthread_mutex_t &mutex) : mutex(mutex) {
+PThreadLockGuard::PThreadLockGuard(pthread_mutex_t &mutex) :
+        mutex(mutex) {
     pthread_mutex_lock(&mutex);
 }
 

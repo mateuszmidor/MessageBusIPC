@@ -26,7 +26,6 @@ MessageClient::~MessageClient() {
     delete[] buffer;
 }
 
-
 /**
  * @name    initializeAndListen
  * @param   callback Callback function that will handle incoming messages
@@ -36,12 +35,12 @@ MessageClient::~MessageClient() {
 void MessageClient::initializeAndListen(CallbackFunction callback, bool auto_reconnect) {
 
     do {
-    	// 1. if can successfully connect, then listen until connection is broken
-    	if (tryConnectToMessageHub())
-    		auto_reconnect &= listenUntilConnectionBroken(callback);
+        // 1. if can successfully connect, then listen until connection is broken
+        if (tryConnectToMessageHub())
+            auto_reconnect &= listenUntilConnectionBroken(callback);
 
-    	// 2. sleep a while and maybe reconnect and listen again
-		sleep (RECONNECT_DELAY_SECONDS);
+        // 2. sleep a while and maybe reconnect and listen again
+        sleep(RECONNECT_DELAY_SECONDS);
     } while (auto_reconnect);
 
     DEBUG_MSG("%s: finished listening to incoming messages.", __FUNCTION__);
@@ -55,14 +54,14 @@ bool MessageClient::listenUntilConnectionBroken(CallbackFunction callback) {
     uint32_t message_id = 0;
     uint32_t size = 0;
 
-	while (server_channel.receive(message_id, buffer, size))
-		if (callback(message_id, buffer, size) == false) {
-			DEBUG_MSG("%s: message callback returns false. Finish reception loop",__FUNCTION__);
-			return false;
-		}
+    while (server_channel.receive(message_id, buffer, size))
+        if (callback(message_id, buffer, size) == false) {
+            DEBUG_MSG("%s: message callback returns false. Finish reception loop", __FUNCTION__);
+            return false;
+        }
 
-	// connection broken if we got here
-	return true;
+    // connection broken if we got here
+    return true;
 }
 
 /**
@@ -71,14 +70,14 @@ bool MessageClient::listenUntilConnectionBroken(CallbackFunction callback) {
  * @note	Thread safe
  */
 bool MessageClient::send(uint32_t message_id, const char *data, uint32_t size) {
-	PThreadLockGuard lock(mutex); // only one thread can send at a time
+    PThreadLockGuard lock(mutex); // only one thread can send at a time
 
-	return server_channel.send(message_id, data, size);
+    return server_channel.send(message_id, data, size);
 }
 
 /**
  * @name   tryConnectToMessageHub
  */
 bool MessageClient::tryConnectToMessageHub() {
-	return server_channel.connectToMessageHub();
+    return server_channel.connectToMessageHub();
 }

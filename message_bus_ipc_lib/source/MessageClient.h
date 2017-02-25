@@ -18,7 +18,7 @@
  */
 class MessageClient {
 public:
-    typedef bool(*CallbackFunction)(uint32_t &id, char *data, uint32_t &size) ;
+    typedef bool (*CallbackFunction)(uint32_t &id, char *data, uint32_t &size);
 
     MessageClient();
     virtual ~MessageClient();
@@ -30,10 +30,10 @@ private:
     char *buffer;
     MessageChannel server_channel;
     pthread_mutex_t mutex;
-	static const int RECONNECT_DELAY_SECONDS = 3;
+    static const int RECONNECT_DELAY_SECONDS = 3;
 
     bool tryConnectToMessageHub();
-	bool listenUntilConnectionBroken(CallbackFunction callback);
+    bool listenUntilConnectionBroken(CallbackFunction callback);
 };
 
 #endif /* MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGECLIENT_H_ */

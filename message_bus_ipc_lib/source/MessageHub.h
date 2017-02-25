@@ -30,7 +30,6 @@ private:
     BlockingMessageQueue message_queue;
     SynchronizedChannelList channel_list;
 
-
     bool startMessageRouterThread();
     void startAcceptClients();
     bool handleClientInSeparateThread(MessageChannel &channel);
@@ -38,14 +37,18 @@ private:
     static void* routeMessagesFunc(void* varg);
 
     struct ClientFuncArg {
-        ClientFuncArg(MessageChannel c, BlockingMessageQueue &q, SynchronizedChannelList &l) : channel(c), message_queue(q), channel_list(l)  {}
+        ClientFuncArg(MessageChannel c, BlockingMessageQueue &q, SynchronizedChannelList &l) :
+                channel(c), message_queue(q), channel_list(l) {
+        }
         MessageChannel channel;
         BlockingMessageQueue &message_queue;
         SynchronizedChannelList &channel_list;
     };
 
     struct RouterFuncArg {
-        RouterFuncArg(BlockingMessageQueue &q, SynchronizedChannelList &l) : message_queue(q), channel_list(l) {}
+        RouterFuncArg(BlockingMessageQueue &q, SynchronizedChannelList &l) :
+                message_queue(q), channel_list(l) {
+        }
         BlockingMessageQueue &message_queue;
         SynchronizedChannelList &channel_list;
     };

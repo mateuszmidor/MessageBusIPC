@@ -12,7 +12,6 @@
 #include "MessageChannel.h"
 #include "PThreadLockGuard.h"
 
-
 /**
  * @class   SynchronizedChannelList
  * @brief   List with thread-safe synchronized add/remove/iterate operations;

@@ -17,7 +17,8 @@
 #include "MessageChannel.h"
 #include "Server.h"
 
-Server::Server(): server_socket_fd(UNINITIALIZED_SOCKET_FD) {
+Server::Server() :
+        server_socket_fd(UNINITIALIZED_SOCKET_FD) {
 }
 
 Server::~Server() {
@@ -72,19 +73,19 @@ bool Server::prepareServerSocket() {
     }
 
     DEBUG_MSG("%s: binding listening socket to %s...", __FUNCTION__, MESSAGE_HUB_SOCKET_FILENAME);
-        // prepare address struct
-        sockaddr_un local;
-        local.sun_family = AF_UNIX;
-        strcpy(local.sun_path, MESSAGE_HUB_SOCKET_FILENAME);
+    // prepare address struct
+    sockaddr_un local;
+    local.sun_family = AF_UNIX;
+    strcpy(local.sun_path, MESSAGE_HUB_SOCKET_FILENAME);
 
-        // bind socket to address in UNIX domain
-        size_t local_length = strlen(local.sun_path) + sizeof(local.sun_family);
-        if (bind(server_socket_fd, (sockaddr*) &local, local_length) == -1) {
-            DEBUG_MSG("%s: bind failed, errno %d - %s", __FUNCTION__, errno, strerror(errno));
-            close(server_socket_fd); // cleanup socket filedescriptor
-            server_socket_fd = UNINITIALIZED_SOCKET_FD; // status: uninitialized
-            return false;
-        }
+    // bind socket to address in UNIX domain
+    size_t local_length = strlen(local.sun_path) + sizeof(local.sun_family);
+    if (bind(server_socket_fd, (sockaddr*) &local, local_length) == -1) {
+        DEBUG_MSG("%s: bind failed, errno %d - %s", __FUNCTION__, errno, strerror(errno));
+        close(server_socket_fd); // cleanup socket filedescriptor
+        server_socket_fd = UNINITIALIZED_SOCKET_FD; // status: uninitialized
+        return false;
+    }
     DEBUG_MSG("%s: done.", __FUNCTION__);
 
     // mark socket as listening socket

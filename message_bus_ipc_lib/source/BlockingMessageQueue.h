@@ -1,5 +1,5 @@
 /**
- *   @file: BlockingQueue.h
+ *   @file: BlockingMessageQueue.h
  *
  *   @date: Feb 23, 2017
  * @author: Mateusz Midor
@@ -31,7 +31,7 @@ private:
     volatile bool data_in_buff;
 
     // message data
-    char * buff;
+    char *buff;
     uint32_t id, size;
     MessageChannel sender;
 };

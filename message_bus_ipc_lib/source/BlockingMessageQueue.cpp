@@ -1,5 +1,5 @@
 /**
- *   @file: BlockingQueue.cpp
+ *   @file: BlockingMessageQueue.cpp
  *
  *   @date: Feb 23, 2017
  * @author: Mateusz Midor
@@ -29,7 +29,8 @@ BlockingMessageQueue::~BlockingMessageQueue() {
 
 /**
  * @name    push
- * @brief   This function copies from data to its internal storage
+ * @brief   This function copies from data to the queue internal storage
+ * @note    Thread safe
  */
 void BlockingMessageQueue::push(const MessageChannel &sender, uint32_t message_id, const char *data, uint32_t size) {
     pthread_mutex_lock(&push_pop_mutex);
@@ -45,14 +46,15 @@ void BlockingMessageQueue::push(const MessageChannel &sender, uint32_t message_i
 
     // signal that the queue now has data in it
     data_in_buff = true;
-    pthread_cond_signal (&queue_not_empty);
+    pthread_cond_signal(&queue_not_empty);
 
     pthread_mutex_unlock(&push_pop_mutex);
 }
 
 /**
  * @name    pop
- * @brief   This function copies from internal storage to data
+ * @brief   This function copies from the queue internal storage to data
+ * @note    Thread safe
  */
 void BlockingMessageQueue::pop(MessageChannel &sender, uint32_t &message_id, char *data, uint32_t &size) {
     pthread_mutex_lock(&push_pop_mutex);
@@ -68,7 +70,7 @@ void BlockingMessageQueue::pop(MessageChannel &sender, uint32_t &message_id, cha
 
     // signal that the queue now has free room
     data_in_buff = false;
-    pthread_cond_signal (&queue_not_full);
+    pthread_cond_signal(&queue_not_full);
 
     pthread_mutex_unlock(&push_pop_mutex);
 }

@@ -10,7 +10,6 @@
 #include "PThreadLockGuard.h"
 #include "SynchronizedChannelList.h"
 
-
 /**
  * Iterator Constructor.
  * @param   channels MessageChannel list to iterate over
@@ -18,17 +17,14 @@
  * @brief   channellist_lock locks the mutex, so add/remove operations of SynchronizedChannelList are blocked
  */
 SynchronizedChannelList::Iterator::Iterator(std::vector<MessageChannel> &channels, pthread_mutex_t &mutex) :
-        channels(channels), channellist_lock(mutex) {
-
-    // set iterator to starting position
-    current_position = 0;
+        channels(channels), current_position(0), channellist_lock(mutex) {
 }
 
 /**
  * Iterator Destructor.
- * @brief   channellist_lock gets destroyed and unlocks the mutex, so add/remove operations of SynchronizedChannelList get unlocked
  */
 SynchronizedChannelList::Iterator::~Iterator() {
+    // channellist_lock gets destroyed and unlocks the mutex, so add/remove operations of SynchronizedChannelList get unlocked
 }
 
 /**
@@ -42,10 +38,6 @@ MessageChannel const* SynchronizedChannelList::Iterator::getNext() {
 
     return &channels[current_position++];
 }
-
-
-
-
 
 /**
  * SynchronizedChannelList Constructor.

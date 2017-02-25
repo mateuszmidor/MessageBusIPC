@@ -17,10 +17,14 @@
  */
 class MessageChannel {
 public:
-    MessageChannel(int socket_fd = -1);
+    MessageChannel(int socket_fd = UNINITIALIZED_SOCKET_FD);
     ~MessageChannel();
-    bool operator==(const MessageChannel& second) const { return socket_fd == second.socket_fd; }
-    bool operator!=(const MessageChannel& second) const { return socket_fd != second.socket_fd; }
+    bool operator==(const MessageChannel& second) const {
+        return socket_fd == second.socket_fd;
+    }
+    bool operator!=(const MessageChannel& second) const {
+        return socket_fd != second.socket_fd;
+    }
 
     bool connectToMessageHub();
     bool send(uint32_t id, const char *data, uint32_t size) const;
