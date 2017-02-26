@@ -11,8 +11,9 @@
 #include <pthread.h>
 #include <stdint.h>
 #include "MessageChannel.h"
-
+#include "MessageBusIpcCommon.h"
 namespace messagebusipc {
+
 
 /**
  * @class   ThreadsafeMessageQueue
@@ -30,12 +31,20 @@ private:
     pthread_mutex_t push_pop_mutex;
     pthread_cond_t queue_not_empty;
     pthread_cond_t queue_not_full;
-    volatile bool data_in_buff;
 
-    // message data
-    char *buff;
-    uint32_t id, size;
-    MessageChannel sender;
+    // message data queue
+    struct Message {
+        Message() { buff = new char[MESSAGE_BUFF_SIZE]; id = 0; size = 0; }
+        ~Message() { delete[] buff; }
+        char *buff;
+        uint32_t id, size;
+        MessageChannel sender;
+    };
+    static const int MAX_QUEUE_SIZE = 10;
+    Message messages[MAX_QUEUE_SIZE];
+    int num_messages;
+
+
 };
 
 }

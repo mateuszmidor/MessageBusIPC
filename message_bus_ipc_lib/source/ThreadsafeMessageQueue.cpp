@@ -11,23 +11,18 @@
 
 using namespace messagebusipc;
 
-
 ThreadsafeMessageQueue::ThreadsafeMessageQueue() {
     pthread_mutex_init(&push_pop_mutex, NULL);
     pthread_cond_init(&queue_not_empty, NULL);
     pthread_cond_init(&queue_not_full, NULL);
 
-    // for now we only have space for a single message. kind of poor queue :)
-    buff = new char[MESSAGE_BUFF_SIZE];
-    id = size = 0;
-    data_in_buff = false;
+    num_messages = 0;
 }
 
 ThreadsafeMessageQueue::~ThreadsafeMessageQueue() {
     pthread_mutex_destroy(&push_pop_mutex);
     pthread_cond_destroy(&queue_not_empty);
     pthread_cond_destroy(&queue_not_full);
-    delete[] buff;
 }
 
 /**
@@ -39,16 +34,16 @@ void ThreadsafeMessageQueue::push(const MessageChannel &sender, uint32_t message
     pthread_mutex_lock(&push_pop_mutex);
 
     // wait until there is free space in the queue
-    while (data_in_buff)
+    while (num_messages >= MAX_QUEUE_SIZE)
         pthread_cond_wait(&queue_not_full, &push_pop_mutex);
 
-    this->sender = sender;
-    this->id = message_id;
-    this->size = size;
-    memcpy(this->buff, data, size);
+    num_messages++;
+    messages[num_messages-1].sender = sender;
+    messages[num_messages-1].id = message_id;
+    messages[num_messages-1].size = size;
+    memcpy(messages[num_messages-1].buff, data, size);
 
     // signal that the queue now has data in it
-    data_in_buff = true;
     pthread_cond_signal(&queue_not_empty);
 
     pthread_mutex_unlock(&push_pop_mutex);
@@ -63,16 +58,16 @@ void ThreadsafeMessageQueue::pop(MessageChannel &sender, uint32_t &message_id, c
     pthread_mutex_lock(&push_pop_mutex);
 
     // wait until there is data in the queue
-    while (!data_in_buff)
+    while (num_messages == 0)
         pthread_cond_wait(&queue_not_empty, &push_pop_mutex);
 
-    sender = this->sender;
-    message_id = this->id;
-    size = this->size;
-    memcpy(data, this->buff, this->size);
+    sender = messages[num_messages-1].sender;
+    message_id = messages[num_messages-1].id;
+    size = messages[num_messages-1].size;
+    memcpy(data, messages[num_messages-1].buff, messages[num_messages-1].size);
+    num_messages--;
 
     // signal that the queue now has free room
-    data_in_buff = false;
     pthread_cond_signal(&queue_not_full);
 
     pthread_mutex_unlock(&push_pop_mutex);

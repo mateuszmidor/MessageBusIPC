@@ -5,9 +5,9 @@
 
 sleep 1
 
-#./build/message_bus_ipc_performance_test/client_performancetest&
-#./build/message_bus_ipc_performance_test/client_performancetest&
-#./build/message_bus_ipc_performance_test/client_performancetest&
+./build/message_bus_ipc_performance_test/client_performancetest&
+./build/message_bus_ipc_performance_test/client_performancetest&
+./build/message_bus_ipc_performance_test/client_performancetest&
 ./build/message_bus_ipc_performance_test/client_performancetest 100000 1
 
 sleep 1
