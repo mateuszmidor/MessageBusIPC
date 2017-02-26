@@ -101,10 +101,10 @@ bool MessageChannel::send(uint32_t message_id, const char *data, uint32_t size) 
  * @note    Implementation detail
  */
 bool MessageChannel::send_message(uint32_t id, const char *buf, uint32_t size) const {
-    if (!send_buffer(reinterpret_cast<char*>(&id), sizeof(id)))
-        return false;
 
-    if (!send_buffer(reinterpret_cast<char*>(&size), sizeof(size)))
+    uint32_t header[2] = {id, size};
+
+    if (!send_buffer(reinterpret_cast<char*>(&header), sizeof(header)))
         return false;
 
     if (!send_buffer(buf, size))
@@ -158,13 +158,14 @@ bool MessageChannel::receive(uint32_t &message_id, char* buf, uint32_t &size, ui
  * @param   max_size    Maximum number of bytes that can fit into the buffer
  * @note    Implementation detail
  */
-bool MessageChannel::receive_message(uint32_t &id, char* buf, uint32_t &size, uint32_t max_size) const {
-    if (!receive_buffer(reinterpret_cast<char*>(&id), sizeof(id)))
+inline bool MessageChannel::receive_message(uint32_t &id, char* buf, uint32_t &size, uint32_t max_size) const {
+    uint32_t header[2] ;
+
+    if (!receive_buffer(reinterpret_cast<char*>(&header), sizeof(header)))
         return false;
 
-    if (!receive_buffer(reinterpret_cast<char*>(&size), sizeof(size)))
-        return false;
-
+    id = header[0];
+    size = header[1];
     assert(size <= max_size && "Received message size exceeds reception buffer size!");
 
     if (!receive_buffer(buf, size))
