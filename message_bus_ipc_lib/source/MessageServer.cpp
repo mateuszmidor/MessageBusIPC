@@ -17,6 +17,9 @@
 #include "MessageChannel.h"
 #include "MessageServer.h"
 
+using namespace messagebusipc;
+
+
 MessageServer::MessageServer() :
         server_socket_fd(UNINITIALIZED_SOCKET_FD) {
 }

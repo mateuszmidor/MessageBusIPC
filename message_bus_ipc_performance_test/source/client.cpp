@@ -16,6 +16,13 @@
 #include <iostream>
 #include <chrono>
 
+using namespace std;
+using namespace messagebusipc;
+
+
+const int TERMINATE_RECEIVER = 999;
+
+
 class Timer
 {
 public:
@@ -31,10 +38,9 @@ private:
     std::chrono::time_point<clock_> beg_;
 };
 
-const int TERMINATE_RECEIVER = 999;
 
 
-using namespace std;
+
 
 bool callback(uint32_t &id, char *data, uint32_t &size) {
 //    printf("messageId: %d, size: %d\n", id, size);

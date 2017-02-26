@@ -7,6 +7,9 @@
 
 #include "PThreadLockGuard.h"
 
+using namespace messagebusipc;
+
+
 PThreadLockGuard::PThreadLockGuard(pthread_mutex_t &mutex) :
         mutex(mutex) {
     pthread_mutex_lock(&mutex);

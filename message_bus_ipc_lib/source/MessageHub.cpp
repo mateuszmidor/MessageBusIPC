@@ -10,6 +10,9 @@
 #include "MessageChannel.h"
 #include "MessageHub.h"
 
+using namespace messagebusipc;
+
+
 MessageHub::MessageHub() {
 }
 

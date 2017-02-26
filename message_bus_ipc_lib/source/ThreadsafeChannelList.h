@@ -12,6 +12,8 @@
 #include "MessageChannel.h"
 #include "PThreadLockGuard.h"
 
+namespace messagebusipc {
+
 /**
  * @class   ThreadsafeChannelList
  * @brief   List with thread-safe add/remove/iterate operations;
@@ -45,5 +47,7 @@ private:
     pthread_mutex_t channels_mutex;
     std::vector<MessageChannel> channels;
 };
+
+}
 
 #endif /* MESSAGE_BUS_IPC_LIB_SOURCE_THREADSAFECHANNELLIST_H_ */

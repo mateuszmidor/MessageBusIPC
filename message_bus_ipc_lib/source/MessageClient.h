@@ -12,6 +12,8 @@
 #include "PThreadLockGuard.h"
 #include "MessageChannel.h"
 
+namespace messagebusipc {
+
 /**
  * @class   MessageClient
  * @brief   This is the message bus client; it connects to the MessageHub and sends and receives messages from it.
@@ -35,5 +37,7 @@ private:
     bool tryConnectToMessageHub();
     bool listenUntilConnectionBroken(CallbackFunction callback);
 };
+
+}
 
 #endif /* MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGECLIENT_H_ */

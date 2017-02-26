@@ -9,6 +9,9 @@
 #define MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGESERVER_H_
 
 #include "MessageChannel.h"
+
+namespace messagebusipc {
+
 /**
  * @class   MessageServer
  * @brief   Server awaits incoming connections and return them as MessageChannels
@@ -28,5 +31,7 @@ private:
     bool prepareServerSocket();
     void cleanupServerSocket();
 };
+
+}
 
 #endif /* MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGESERVER_H_ */

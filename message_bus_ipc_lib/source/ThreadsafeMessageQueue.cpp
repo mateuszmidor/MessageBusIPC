@@ -5,10 +5,12 @@
  * @author: Mateusz Midor
  */
 
-#include "ThreadsafeMessageQueue.h"
-
 #include <string.h>
 #include "MessageBusIpcCommon.h"
+#include "ThreadsafeMessageQueue.h"
+
+using namespace messagebusipc;
+
 
 ThreadsafeMessageQueue::ThreadsafeMessageQueue() {
     pthread_mutex_init(&push_pop_mutex, NULL);

@@ -5,11 +5,13 @@
  * @author: Mateusz Midor
  */
 
-#include "ThreadsafeChannelList.h"
-
 #include <algorithm>
+#include "ThreadsafeChannelList.h"
 #include "MessageBusIpcCommon.h"
 #include "PThreadLockGuard.h"
+
+using namespace messagebusipc;
+
 
 /**
  * Iterator Constructor.

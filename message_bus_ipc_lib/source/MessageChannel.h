@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include "MessageBusIpcCommon.h"
 
+namespace messagebusipc {
+
 /**
  * @class   MessageChannel
  * @brief   A channel of communication; allows sending and receiving messages over provided socked file descriptor.
@@ -42,5 +44,7 @@ private:
     bool isConnected() const;
     void disconnect();
 };
+
+}
 
 #endif /* MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGECHANNEL_H_ */

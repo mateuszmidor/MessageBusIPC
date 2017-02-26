@@ -15,6 +15,8 @@
 #include "MessageBusIpcCommon.h"
 #include "MessageChannel.h"
 
+using namespace messagebusipc;
+
 MessageChannel::MessageChannel(int socket_fd) :
         socket_fd(socket_fd) {
 }

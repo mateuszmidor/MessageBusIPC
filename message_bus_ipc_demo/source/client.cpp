@@ -14,6 +14,7 @@
 #include "MessageClient.h"
 
 using namespace std;
+using namespace messagebusipc;
 
 bool callback(uint32_t &id, char *data, uint32_t &size) {
     printf("%s\n", data);

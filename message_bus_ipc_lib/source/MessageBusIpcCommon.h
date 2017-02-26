@@ -8,6 +8,8 @@
 #ifndef MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGEBUSIPCCOMMON_H_
 #define MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGEBUSIPCCOMMON_H_
 
+namespace messagebusipc {
+
 // MessageHub listening socket
 const char MESSAGE_HUB_SOCKET_FILENAME[] = "/tmp/sdars_ipc_hub";
 
@@ -24,5 +26,7 @@ const int UNINITIALIZED_SOCKET_FD = -1;
 #else
 # define DEBUG_MSG(...)
 #endif
+
+}
 
 #endif /* MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGEBUSIPCCOMMON_H_ */

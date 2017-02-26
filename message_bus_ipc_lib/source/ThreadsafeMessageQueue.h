@@ -12,6 +12,8 @@
 #include <stdint.h>
 #include "MessageChannel.h"
 
+namespace messagebusipc {
+
 /**
  * @class   ThreadsafeMessageQueue
  * @brief   Thread-safe message queue for Producer-Consumer processing scheme of messages.
@@ -35,5 +37,7 @@ private:
     uint32_t id, size;
     MessageChannel sender;
 };
+
+}
 
 #endif /* MESSAGE_BUS_IPC_LIB_SOURCE_THREADSAFEMESSAGEQUEUE_H_ */

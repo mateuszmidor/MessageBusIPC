@@ -12,6 +12,8 @@
 #include "ThreadsafeChannelList.h"
 #include "ThreadsafeMessageQueue.h"
 
+namespace messagebusipc {
+
 /**
  * @class   MessageHub
  * @brief   This is the heart of our star-topology MessageBusIPC; all MessageClients connect to MessageHub in order to send-receive messages
@@ -53,5 +55,7 @@ private:
         ThreadsafeChannelList &channel_list;
     };
 };
+
+}
 
 #endif /* MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGEHUB_H_ */

@@ -16,6 +16,9 @@
 #include "MessageChannel.h"
 #include "MessageClient.h"
 
+using namespace messagebusipc;
+
+
 MessageClient::MessageClient() {
     pthread_mutex_init(&mutex, NULL);
     buffer = new char[MESSAGE_BUFF_SIZE];

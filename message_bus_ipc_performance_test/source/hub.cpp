@@ -7,6 +7,9 @@
 
 #include "MessageHub.h"
 
+using namespace messagebusipc;
+
+
 int main() {
     MessageHub hub;
     hub.runAndForget();

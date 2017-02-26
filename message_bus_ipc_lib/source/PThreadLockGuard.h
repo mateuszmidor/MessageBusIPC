@@ -10,6 +10,8 @@
 
 #include <pthread.h>
 
+namespace messagebusipc {
+
 /**
  * @class   LockGuard
  * @brief   std::lock_guard for non-c++11 projects
@@ -22,5 +24,7 @@ public:
 private:
     pthread_mutex_t &mutex;
 };
+
+}
 
 #endif /* MESSAGE_BUS_IPC_LIB_SOURCE_PTHREADLOCKGUARD_H_ */
