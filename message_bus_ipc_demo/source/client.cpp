@@ -16,36 +16,50 @@
 using namespace std;
 using namespace messagebusipc;
 
-bool callback(uint32_t &id, char *data, uint32_t &size) {
-    printf("%s\n", data);
-    return true;
-}
 
-void sendBunchOfMessages( MessageClient& client, char** argv) {
-    for (int i = 0; i < 10; i++) {
-        client.send(50, argv[1], strlen(argv[1]) + 1); // +1 for null
-        sleep(1);
+class Client {
+public:
+    Client() {
+        auto thread_func = [this](){ client.initializeAndListenMemberFunc(this, &Client::onMessage); };
+        std::thread t = std::thread(thread_func);
+        t.detach();
+        n_prints = 0;
     }
-}
 
-void startInteractiveSession(MessageClient& client) {
-    string s;
-    do {
-        getline(cin, s);
-        client.send(50, s.c_str(), s.length() + 1);
-    } while (s != "exit");
-}
+    void sendBunchOfMessages(const char* str) {
+        for (int i = 0; i < 10; i++) {
+            client.send(50, str, strlen(str) + 1); // +1 for null
+            sleep(1);
+        }
+    }
+
+    void startInteractiveSession() {
+        string s;
+        do {
+            getline(cin, s);
+            client.send(50, s.c_str(), s.length() + 1); // +1 for null
+        } while (s != "exit");
+    }
+
+private:
+    MessageClient client;
+    int n_prints;
+
+    bool onMessage(uint32_t &id, char *data, uint32_t &size) {
+        printf("%d. %s\n", n_prints, data);
+        n_prints++;
+        return true;
+    }
+};
+
 
 int main(int argc, char** argv) {
-    MessageClient client;
-
-    std::thread t([&client]() {client.initializeAndListen(callback);});
-    t.detach();
+    Client client;
 
     if (argc > 1)
-        sendBunchOfMessages(client, argv);
+        client.sendBunchOfMessages(argv[1]);
     else
-        startInteractiveSession(client);
+        client.startInteractiveSession();
 
     return 0;
 }
