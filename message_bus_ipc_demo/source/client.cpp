@@ -16,43 +16,48 @@
 using namespace std;
 using namespace messagebusipc;
 
+
+const char* CHAT_CLIENT_NAME = "ChatClient";
+
 //====================================================================================================
 // Declaration
 //====================================================================================================
-class MessageBusTermianalExample {
+class ChatClient {
 public:
-    MessageBusTermianalExample();
+    ChatClient();
     void startInteractiveSession();
 
 private:
     MessageClient client;
-    int n_prints;
+    int curr_msg_number;
     bool onMessage(uint32_t &id, char *data, uint32_t &size);
 };
 
 //====================================================================================================
 // Definition
 //====================================================================================================
-MessageBusTermianalExample::MessageBusTermianalExample() {
-    auto thread_func = [this](){ client.initializeAndListenMemberFunc(this, &MessageBusTermianalExample::onMessage, "Terminal"); };
+ChatClient::ChatClient() : curr_msg_number(1) {
+    // register to the MessageHub as "ChatClient" and run listener in a separate thread
+    auto thread_func = [this]() {client.initializeAndListenMemberFunc(this, &ChatClient::onMessage, CHAT_CLIENT_NAME);};
     std::thread t = std::thread(thread_func);
     t.detach();
-    n_prints = 1;
-    printf("You can start typing now...\n");
 }
 
-void MessageBusTermianalExample::startInteractiveSession() {
+void ChatClient::startInteractiveSession() {
+    // read user input from terminal and send to other clients, over and over again
+    printf("You can start typing now...\n");
     string s;
     do {
         getline(cin, s);
-        client.waitForClient("Terminal");
-        client.send(50, s.c_str(), s.length() + 1, "Terminal"); // +1 for null
+        client.waitForClient(CHAT_CLIENT_NAME); // wait until there is some ChatClient to send the msg to
+        client.send(50, s.c_str(), s.length() + 1, CHAT_CLIENT_NAME); // +1 for null
     } while (s != "exit");
 }
 
-bool MessageBusTermianalExample::onMessage(uint32_t &id, char *data, uint32_t &size) {
-    printf("[%d] %s\n", n_prints, data);
-    n_prints++;
+bool ChatClient::onMessage(uint32_t &id, char *data, uint32_t &size) {
+    // print incoming message and return true to continue the listener work
+    printf("[%d] %s\n", curr_msg_number, data);
+    curr_msg_number++;
     return true;
 }
 
@@ -61,8 +66,7 @@ bool MessageBusTermianalExample::onMessage(uint32_t &id, char *data, uint32_t &s
 // Program entry point
 //====================================================================================================
 int main(int argc, char** argv) {
-    MessageBusTermianalExample terminal;
-    terminal.startInteractiveSession();
-
+    ChatClient client;
+    client.startInteractiveSession();
     return 0;
 }
