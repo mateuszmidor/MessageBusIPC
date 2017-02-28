@@ -8,6 +8,8 @@
 #ifndef MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGEBUSIPCCOMMON_H_
 #define MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGEBUSIPCCOMMON_H_
 
+#include <cstdio>
+
 namespace messagebusipc {
 
 // MessageHub listening socket
@@ -21,7 +23,6 @@ const int UNINITIALIZED_SOCKET_FD = -1;
 
 // Debugging messages routine
 #ifndef NDEBUG
-#include <cstdio>
 # define DEBUG_MSG(fmt, ...) printf(fmt "\n", __VA_ARGS__)
 #else
 # define DEBUG_MSG(...)

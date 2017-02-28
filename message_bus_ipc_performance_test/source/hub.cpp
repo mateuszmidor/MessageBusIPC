@@ -11,7 +11,6 @@ using namespace messagebusipc;
 
 
 int main() {
-    MessageHub hub;
-    hub.runAndForget();
+    MessageHub::runAndForget(false);
     return 0;
 }

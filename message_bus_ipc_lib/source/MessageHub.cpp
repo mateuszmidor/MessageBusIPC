@@ -12,20 +12,57 @@
 
 using namespace messagebusipc;
 
-
-MessageHub::MessageHub() {
-}
-
-MessageHub::~MessageHub() {
+/**
+ * @name    runAndForget
+ * @param   own_thread Should it be run in its own thread(non-blocking run)
+ * @brief   Run the MessageHub and forget about it
+ * @return  True on succcess, False otherwise
+ */
+bool MessageHub::runAndForget(bool own_thread) {
+    if (own_thread)
+        return runInSeparateThread(); // doesn't block
+    else
+        return (bool)runInCurrentThread(); // does block
 }
 
 /**
- * @name    runAndForget
- * @brief   Run the MessageHub and forget about it
- * @return  true if successfuly initialized and run, false otherwise
- * @note    This is blocking method. Best called from separate thread
+ * @name    runInSeparateThread
+ * @brief   Create a thread and then run the MessageHub in that thread
+ * @return  True on success, False otherwise
  */
-bool MessageHub::runAndForget() {
+bool MessageHub::runInSeparateThread() {
+    pthread_t thread;
+    int return_code;
+
+    return_code = pthread_create(&thread, NULL, MessageHub::runInCurrentThread, NULL);
+    if (return_code) {
+        DEBUG_MSG("%s: pthread_create failed with error code: %d", __FUNCTION__, return_code);
+        return false;
+    }
+
+    return_code = pthread_detach(thread);
+    if (return_code) {
+        DEBUG_MSG("%s: pthread_detach failed with error code: %d", __FUNCTION__, return_code);
+        return false;
+    }
+    return true;
+}
+
+/**
+ * @name    runInCurrentThread
+ * @param   varg Not used. Only there so this function can be used as pthread_create routine
+ */
+void* MessageHub::runInCurrentThread(void* varg) {
+    MessageHub hub;
+    return (void*)hub.run();
+}
+
+/**
+ * @name    run
+ * @brief   Run the MessageHub machinery
+ * @return  true if successfully initialized and run, false otherwise
+ */
+bool MessageHub::run() {
     // 1. prepare listening server
     if (!server.init())
         return false;

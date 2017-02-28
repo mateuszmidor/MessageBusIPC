@@ -21,10 +21,7 @@ namespace messagebusipc {
  */
 class MessageHub {
 public:
-    MessageHub();
-    virtual ~MessageHub();
-
-    bool runAndForget();
+    static bool runAndForget(bool own_thread = false);
 
 private:
 
@@ -32,9 +29,12 @@ private:
     ThreadsafeMessageQueue message_queue;
     ThreadsafeChannelList channel_list;
 
+    bool run();
     bool startMessageRouterThread();
     void startAcceptClients();
     bool handleClientInSeparateThread(MessageChannel &channel);
+    static bool runInSeparateThread();
+    static void* runInCurrentThread(void* varg = NULL);
     static void* handleClientFunc(void* varg);
     static void* routeMessagesFunc(void* varg);
 
