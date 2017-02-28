@@ -44,7 +44,7 @@ private:
     };
     static const int MAX_QUEUE_SIZE = 10;
     Message messages[MAX_QUEUE_SIZE];
-    int num_messages;
+    int reader_pos, writer_pos;
 
 
 };

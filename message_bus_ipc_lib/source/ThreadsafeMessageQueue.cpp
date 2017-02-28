@@ -16,7 +16,8 @@ ThreadsafeMessageQueue::ThreadsafeMessageQueue() {
     pthread_cond_init(&queue_not_empty, NULL);
     pthread_cond_init(&queue_not_full, NULL);
 
-    num_messages = 0;
+    reader_pos = 0;
+    writer_pos = 0;
 }
 
 ThreadsafeMessageQueue::~ThreadsafeMessageQueue() {
@@ -34,15 +35,16 @@ void ThreadsafeMessageQueue::push(const MessageChannel &sender, uint32_t message
     pthread_mutex_lock(&push_pop_mutex);
 
     // wait until there is free space in the queue
-    while (num_messages >= MAX_QUEUE_SIZE)
+    while (((writer_pos+1) % MAX_QUEUE_SIZE) == reader_pos)
         pthread_cond_wait(&queue_not_full, &push_pop_mutex);
 
-    num_messages++;
-    messages[num_messages-1].sender = sender;
-    messages[num_messages-1].id = message_id;
-    messages[num_messages-1].size = size;
-    messages[num_messages-1].recipient = recipient;
-    memcpy(messages[num_messages-1].buff, data, size);
+    Message &m = messages[writer_pos];
+    m.sender = sender;
+    m.id = message_id;
+    m.size = size;
+    m.recipient = recipient;
+    memcpy(m.buff, data, size);
+    writer_pos = (writer_pos + 1) % MAX_QUEUE_SIZE; // advance the writer
 
     // signal that the queue now has data in it
     pthread_cond_signal(&queue_not_empty);
@@ -59,15 +61,16 @@ void ThreadsafeMessageQueue::pop(MessageChannel &sender, uint32_t &message_id, c
     pthread_mutex_lock(&push_pop_mutex);
 
     // wait until there is data in the queue
-    while (num_messages == 0)
+    while (reader_pos == writer_pos)
         pthread_cond_wait(&queue_not_empty, &push_pop_mutex);
 
-    sender = messages[num_messages-1].sender;
-    message_id = messages[num_messages-1].id;
-    size = messages[num_messages-1].size;
-    recipient = messages[num_messages-1].recipient;
-    memcpy(data, messages[num_messages-1].buff, messages[num_messages-1].size);
-    num_messages--;
+    Message &m = messages[reader_pos];
+    sender = m.sender;
+    message_id = m.id;
+    size = m.size;
+    recipient = m.recipient;
+    memcpy(data, m.buff, m.size);
+    reader_pos = (reader_pos + 1) % MAX_QUEUE_SIZE; // advance the reader
 
     // signal that the queue now has free room
     pthread_cond_signal(&queue_not_full);
