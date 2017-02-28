@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include "PThreadLockGuard.h"
+#include "ThreadsafeClientList.h"
 #include "MessageChannel.h"
 
 namespace messagebusipc {
@@ -51,23 +52,28 @@ public:
             if (tryConnectToMessageHub(client_name))
                 auto_reconnect &= listenUntilConnectionBroken(callback);
 
-            // 2. sleep a while and maybe reconnect and listen again
+            // 2. we got here so connection broken; clear available client list
+            connected_clients.update("");
+
+            // 3. sleep a while and maybe reconnect and listen again
             sleep(RECONNECT_DELAY_SECONDS);
         } while (auto_reconnect);
 
         DEBUG_MSG("%s: finished listening to incoming messages.", __FUNCTION__);
     }
 
-    bool send(uint32_t id, const char *data, uint32_t size, const char *recipient_name);
+    void waitForClient(const char *client_name);
+    bool send(uint32_t id, const char *data, uint32_t size, const char *client_name);
 
 private:
-    char *buffer;
+    char *message_buffer;
     MessageChannel server_channel;
-    pthread_mutex_t mutex;
+    pthread_mutex_t send_mutex;
+    ThreadsafeClientList connected_clients;
     static const int RECONNECT_DELAY_SECONDS = 3;
+    static const int WAIT_CLIENT_DELAY_MSECONDS = 100;
 
     bool tryConnectToMessageHub(const char *client_name);
-
 
     /**
      * @name    listenUntilConnectionBroken
@@ -77,10 +83,14 @@ private:
     bool listenUntilConnectionBroken(Callback callback) {
         uint32_t message_id = 0;
         uint32_t size = 0;
-        std::string recipient; // discard this
+        std::string recipient; // discard this as we know who we are
 
-        while (server_channel.receive(message_id, buffer, size, recipient))
-            if (callback(message_id, buffer, size) == false) {
+        while (server_channel.receive(message_id, message_buffer, size, recipient))
+            if (message_id == ID_CONNECTED_CLIENT_LIST) {
+                DEBUG_MSG("%s: update connected clients: [%s]", __FUNCTION__, message_buffer);
+                connected_clients.update(message_buffer);
+            }
+            else if (callback(message_id, message_buffer, size) == false) {
                 DEBUG_MSG("%s: message callback returns false. Finish reception loop", __FUNCTION__);
                 return false;
             }

@@ -33,6 +33,7 @@ private:
     bool startMessageRouterThread();
     void startAcceptClients();
     bool handleClientInSeparateThread(MessageChannel &channel);
+    static void broadcastConnectedClientList(ThreadsafeChannelList &channel_list);
     static bool runInSeparateThread();
     static void* runInCurrentThread(void* varg = NULL);
     static void* handleClientFunc(void* varg);

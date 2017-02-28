@@ -117,12 +117,34 @@ void MessageHub::startAcceptClients() {
         // 2. put it on the list so the router function knows about it
         channel_list.add(channel);
 
-        // 3. handle the client in separate thread
+        // 3. send list of connected clients to all clients
+        broadcastConnectedClientList(channel_list);
+
+        // 4. handle the client in separate thread
         if (!handleClientInSeparateThread(channel))
             DEBUG_MSG("%s: handleClientInSeparateThread failed", __FUNCTION__);
     }
 }
 
+void MessageHub::broadcastConnectedClientList(ThreadsafeChannelList &channel_list) {
+    ThreadsafeChannelList::Iterator it  = channel_list.getIterator(); // this is thread sync point
+    MessageChannel const * recipient;
+    std::vector<MessageChannel const *> clients;
+
+    // prepare client list
+    while ((recipient = it.getNext()))
+        clients.push_back(recipient);
+
+    // for each client create a list of client names excluding itself and send the list to the client
+    it.reset();
+    while ((recipient = it.getNext())) {
+        std::string client_string;
+        for (unsigned int i = 0; i < clients.size(); i++)
+            if (clients[i] != recipient)
+                client_string += clients[i]->name() + ";";
+        recipient->send(ID_CONNECTED_CLIENT_LIST, client_string.c_str(), client_string.size() + 1, "");
+    }
+}
 /**
  * @name    handleClientInSeparateThread
  * @param   channel Communication channel of the connection that we want to handle
@@ -171,8 +193,10 @@ void* MessageHub::handleClientFunc(void* varg) {
     DEBUG_MSG("%s", "Client disconnect.");
 
     arg->channel_list.removeByValue(channel);
+    broadcastConnectedClientList(arg->channel_list);
     delete[] data;
     delete arg;
+
     return NULL;
 }
 

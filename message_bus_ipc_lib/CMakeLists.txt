@@ -6,6 +6,7 @@ add_library(MessageBusIpcLib
             source/PThreadLockGuard.cpp
             source/ThreadsafeMessageQueue.cpp
             source/ThreadsafeChannelList.cpp
+            source/ThreadsafeClientList.cpp
 )
 
 target_include_directories(MessageBusIpcLib

@@ -45,6 +45,7 @@ void MessageBusTermianalExample::startInteractiveSession() {
     string s;
     do {
         getline(cin, s);
+        client.waitForClient("Terminal");
         client.send(50, s.c_str(), s.length() + 1, "Terminal"); // +1 for null
     } while (s != "exit");
 }

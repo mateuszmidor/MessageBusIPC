@@ -16,7 +16,8 @@ namespace messagebusipc {
 
 // Message IDs. Add your messages here
 enum MessageBusMessages {
-    ID_CLIENT_SAYS_HELLO = 1000000
+    ID_CLIENT_SAYS_HELLO = 1000000,                         // sent to the hub when client connects, conveys client name
+    ID_CONNECTED_CLIENT_LIST                                // broadcasted to all when client connects/disconnects from hub
 };
 
 

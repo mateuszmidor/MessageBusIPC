@@ -20,13 +20,23 @@ using namespace messagebusipc;
 
 
 MessageClient::MessageClient() {
-    pthread_mutex_init(&mutex, NULL);
-    buffer = new char[MESSAGE_BUFF_SIZE];
+    pthread_mutex_init(&send_mutex, NULL);
+    message_buffer = new char[MESSAGE_BUFF_SIZE];
 }
 
 MessageClient::~MessageClient() {
-    pthread_mutex_destroy(&mutex);
-    delete[] buffer;
+    pthread_mutex_destroy(&send_mutex);
+    delete[] message_buffer;
+}
+
+/**
+ * @name    waitForClient
+ * @brief   Block current thread until given client becomes available
+ */
+void MessageClient::waitForClient(const char *client_name) {
+    // could be based on synchronization primitives but lets keep things simple :)
+    while (!connected_clients.exists(client_name))
+        usleep (WAIT_CLIENT_DELAY_MSECONDS);
 }
 
 /**
@@ -34,10 +44,10 @@ MessageClient::~MessageClient() {
  * @brief   Send single message to the message hub
  * @note	Thread safe
  */
-bool MessageClient::send(uint32_t message_id, const char *data, uint32_t size, const char *recipient_name) {
-    PThreadLockGuard lock(mutex); // only one thread can send at a time
+bool MessageClient::send(uint32_t message_id, const char *data, uint32_t size, const char *client_name) {
+    PThreadLockGuard lock(send_mutex); // only one thread can send at a time
 
-    return server_channel.send(message_id, data, size, recipient_name);
+    return server_channel.send(message_id, data, size, client_name);
 }
 
 /**

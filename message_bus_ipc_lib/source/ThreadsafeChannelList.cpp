@@ -43,6 +43,13 @@ MessageChannel const* ThreadsafeChannelList::Iterator::getNext() {
 }
 
 /**
+ * @name    reset
+ * @brief   Reset the iterator to start from beginning
+ */
+void ThreadsafeChannelList::Iterator::reset() {
+    current_position = 0;
+}
+/**
  * ThreadsafeChannelList Constructor.
  * @brief   Initialize the add/remove/iterate mutex
  */

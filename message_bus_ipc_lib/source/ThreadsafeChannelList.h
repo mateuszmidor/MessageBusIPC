@@ -27,6 +27,7 @@ public:
         Iterator(std::vector<MessageChannel> &channels, pthread_mutex_t &mtx);
         ~Iterator();
         MessageChannel const* getNext();
+        void reset();
 
     private:
         std::vector<MessageChannel> &channels;
