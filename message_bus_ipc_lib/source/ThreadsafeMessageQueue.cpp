@@ -30,7 +30,7 @@ ThreadsafeMessageQueue::~ThreadsafeMessageQueue() {
  * @brief   This function copies from data to the queue internal storage
  * @note    Thread safe
  */
-void ThreadsafeMessageQueue::push(const MessageChannel &sender, uint32_t message_id, const char *data, uint32_t size) {
+void ThreadsafeMessageQueue::push(const MessageChannel &sender, uint32_t message_id, const char *data, uint32_t size, const std::string &recipient) {
     pthread_mutex_lock(&push_pop_mutex);
 
     // wait until there is free space in the queue
@@ -41,6 +41,7 @@ void ThreadsafeMessageQueue::push(const MessageChannel &sender, uint32_t message
     messages[num_messages-1].sender = sender;
     messages[num_messages-1].id = message_id;
     messages[num_messages-1].size = size;
+    messages[num_messages-1].recipient = recipient;
     memcpy(messages[num_messages-1].buff, data, size);
 
     // signal that the queue now has data in it
@@ -54,7 +55,7 @@ void ThreadsafeMessageQueue::push(const MessageChannel &sender, uint32_t message
  * @brief   This function copies from the queue internal storage to data
  * @note    Thread safe
  */
-void ThreadsafeMessageQueue::pop(MessageChannel &sender, uint32_t &message_id, char *data, uint32_t &size) {
+void ThreadsafeMessageQueue::pop(MessageChannel &sender, uint32_t &message_id, char *data, uint32_t &size, std::string &recipient) {
     pthread_mutex_lock(&push_pop_mutex);
 
     // wait until there is data in the queue
@@ -64,6 +65,7 @@ void ThreadsafeMessageQueue::pop(MessageChannel &sender, uint32_t &message_id, c
     sender = messages[num_messages-1].sender;
     message_id = messages[num_messages-1].id;
     size = messages[num_messages-1].size;
+    recipient = messages[num_messages-1].recipient;
     memcpy(data, messages[num_messages-1].buff, messages[num_messages-1].size);
     num_messages--;
 

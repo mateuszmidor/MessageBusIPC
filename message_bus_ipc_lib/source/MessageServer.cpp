@@ -47,14 +47,40 @@ MessageChannel MessageServer::acceptOne() {
     unsigned remote_length = sizeof(remote);
     int client_socket_fd;
 
-    // repeat until success
+    // 1. repeat waiting for client until success
     do {
         client_socket_fd = accept(server_socket_fd, (sockaddr*) &remote, &remote_length);
         if (client_socket_fd == UNINITIALIZED_SOCKET_FD)
             DEBUG_MSG("%s: accept failed, errno %d - %s", __FUNCTION__, errno, strerror(errno));
     } while (client_socket_fd == UNINITIALIZED_SOCKET_FD);
 
-    return MessageChannel(client_socket_fd);
+    // 2. client connected, now turn socket into a channel
+    MessageChannel channel = prepareChannel(client_socket_fd);
+    DEBUG_MSG("client connected: %s", channel.name().c_str());
+
+    return channel;
+}
+
+/**
+ * @name    prepareChannel
+ * @param   socket_fd Socket file descriptor to turn into a channel
+ * @return  MessageChannel based on given socket_fd
+ */
+MessageChannel MessageServer::prepareChannel(int socket_fd) {
+    uint32_t message_id; // will be ID_CLIENT_SAYS_HALLO
+    uint32_t size;
+    std::string name;
+    char empty_buffer[1];
+
+    // 1. create a channel
+    MessageChannel channel(socket_fd);
+
+    // 2. receive hello message with channel name from MessageClient
+    channel.receive(message_id, empty_buffer, size, name);
+
+    // 3. setup channel name
+    channel.setName(name);
+    return channel;
 }
 /**
  * @name    prepareServerSocket

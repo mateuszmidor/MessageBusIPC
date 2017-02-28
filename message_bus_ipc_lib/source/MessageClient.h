@@ -32,9 +32,9 @@ public:
      * @note    memfun: bool (*memfun)(uint32_t &id, char *data, uint32_t &size);
      */
     template <class ObjPtr, class MemFuncPtr>
-    void initializeAndListenMemberFunc(ObjPtr obj, MemFuncPtr memfun, bool auto_reconnect = true) {
+    void initializeAndListenMemberFunc(ObjPtr obj, MemFuncPtr memfun, const char *client_name, bool auto_reconnect = true) {
         MemberCallback<ObjPtr, MemFuncPtr> mc(obj, memfun);
-        initializeAndListen(mc, auto_reconnect);
+        initializeAndListen(mc, client_name, auto_reconnect);
     }
 
     /**
@@ -45,10 +45,10 @@ public:
      * @note    memfun: bool (*memfun)(uint32_t &id, char *data, uint32_t &size);
      */
     template <class Callback>
-    void initializeAndListen(Callback callback, bool auto_reconnect = true) {
+    void initializeAndListen(Callback callback, const char *client_name, bool auto_reconnect = true) {
         do {
             // 1. if can successfully connect, then listen until connection is broken
-            if (tryConnectToMessageHub())
+            if (tryConnectToMessageHub(client_name))
                 auto_reconnect &= listenUntilConnectionBroken(callback);
 
             // 2. sleep a while and maybe reconnect and listen again
@@ -58,7 +58,7 @@ public:
         DEBUG_MSG("%s: finished listening to incoming messages.", __FUNCTION__);
     }
 
-    bool send(uint32_t id, const char *data, uint32_t size);
+    bool send(uint32_t id, const char *data, uint32_t size, const char *recipient_name);
 
 private:
     char *buffer;
@@ -66,7 +66,7 @@ private:
     pthread_mutex_t mutex;
     static const int RECONNECT_DELAY_SECONDS = 3;
 
-    bool tryConnectToMessageHub();
+    bool tryConnectToMessageHub(const char *client_name);
 
 
     /**
@@ -77,8 +77,9 @@ private:
     bool listenUntilConnectionBroken(Callback callback) {
         uint32_t message_id = 0;
         uint32_t size = 0;
+        std::string recipient; // discard this
 
-        while (server_channel.receive(message_id, buffer, size))
+        while (server_channel.receive(message_id, buffer, size, recipient))
             if (callback(message_id, buffer, size) == false) {
                 DEBUG_MSG("%s: message callback returns false. Finish reception loop", __FUNCTION__);
                 return false;

@@ -8,6 +8,7 @@
 #ifndef MESSAGE_BUS_IPC_LIB_SOURCE_THREADSAFEMESSAGEQUEUE_H_
 #define MESSAGE_BUS_IPC_LIB_SOURCE_THREADSAFEMESSAGEQUEUE_H_
 
+#include <string>
 #include <pthread.h>
 #include <stdint.h>
 #include "MessageChannel.h"
@@ -24,8 +25,8 @@ public:
     ThreadsafeMessageQueue();
     virtual ~ThreadsafeMessageQueue();
 
-    void push(const MessageChannel &sender, uint32_t id, const char *data, uint32_t size);
-    void pop(MessageChannel &sender, uint32_t &id, char *data, uint32_t &size);
+    void push(const MessageChannel &sender, uint32_t id, const char *data, uint32_t size, const std::string &recipient);
+    void pop(MessageChannel &sender, uint32_t &id, char *data, uint32_t &size, std::string &recipient);
 
 private:
     pthread_mutex_t push_pop_mutex;
@@ -39,6 +40,7 @@ private:
         char *buff;
         uint32_t id, size;
         MessageChannel sender;
+        std::string recipient;
     };
     static const int MAX_QUEUE_SIZE = 10;
     Message messages[MAX_QUEUE_SIZE];

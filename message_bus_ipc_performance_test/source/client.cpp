@@ -43,7 +43,6 @@ private:
 
 
 bool callback(uint32_t &id, char *data, uint32_t &size) {
-//    printf("messageId: %d, size: %d\n", id, size);
     return (id != TERMINATE_RECEIVER);
 }
 
@@ -51,21 +50,26 @@ void sendBunchOfMessages( MessageClient& client, int num_messages, int msg_size_
     char *data = new char[msg_size_in_kb * 1024];
 
     for (int i = 0; i < num_messages; i++)
-        client.send(50, data, msg_size_in_kb * 1024);
+        client.send(50, data, msg_size_in_kb * 1024, "receiver");
 
     // terminate clients
-    client.send(TERMINATE_RECEIVER, nullptr, 0);
+    client.send(TERMINATE_RECEIVER, nullptr, 0, "receiver");
 
     delete[] data;
 }
 
-void runAsReceiver(std::thread& t) {
+void runAsReceiver() {
+    MessageClient client;
+    std::thread t([&client]() {client.initializeAndListen(callback, "receiver");});
     printf("Run as message receiver. "
             "You can run as sender by providing num messages and msg size in KB eg. ./client_performance 100 1\n");
     t.join();
 }
 
-void runAsSender(MessageClient &client, std::thread &t, char** argv) {
+void runAsSender( char** argv) {
+    MessageClient client;
+    std::thread t([&client]() {client.initializeAndListen(callback, "sender");});
+
     // run as sender. has num messages and message size in KB params
     sleep(1); // let the hub and receivers start
     int num_messages = atoi(argv[1]);
@@ -85,13 +89,11 @@ void runAsSender(MessageClient &client, std::thread &t, char** argv) {
 }
 
 int main(int argc, char** argv) {
-    MessageClient client;
-    std::thread t([&client]() {client.initializeAndListen(callback);});
 
     if (argc != 3)
-        runAsReceiver(t);
+        runAsReceiver();
     else
-        runAsSender(client, t, argv);
+        runAsSender(argv);
 
     return 0;
 }

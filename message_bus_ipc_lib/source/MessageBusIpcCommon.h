@@ -9,8 +9,18 @@
 #define MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGEBUSIPCCOMMON_H_
 
 #include <cstdio>
+#include <stdint.h>
 
 namespace messagebusipc {
+
+
+// Message IDs. Add your messages here
+enum MessageBusMessages {
+    ID_CLIENT_SAYS_HELLO = 1000000
+};
+
+
+
 
 // MessageHub listening socket
 const char MESSAGE_HUB_SOCKET_FILENAME[] = "/tmp/sdars_ipc_hub";

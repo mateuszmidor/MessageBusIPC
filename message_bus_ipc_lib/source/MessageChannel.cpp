@@ -81,7 +81,7 @@ bool MessageChannel::isConnected() const {
  * @param   size Message payload size in bytes
  * @return  True if send was successful, False otherwise
  */
-bool MessageChannel::send(uint32_t message_id, const char *data, uint32_t size) const {
+bool MessageChannel::send(uint32_t message_id, const char *data, uint32_t size, const char *recipient) const {
 
     // check connection
     if (!isConnected()) {
@@ -90,7 +90,7 @@ bool MessageChannel::send(uint32_t message_id, const char *data, uint32_t size) 
     }
 
     // send the message
-    if (!send_message(message_id, data, size)) {
+    if (!send_message(message_id, data, size, recipient)) {
         DEBUG_MSG("%s: send_message failed, errno %d - %s", __FUNCTION__, errno, strerror(errno));
         return false;
     }
@@ -102,9 +102,12 @@ bool MessageChannel::send(uint32_t message_id, const char *data, uint32_t size) 
  * @name    send_message
  * @note    Implementation detail
  */
-bool MessageChannel::send_message(uint32_t id, const char *buf, uint32_t size) const {
+bool MessageChannel::send_message(uint32_t id, const char *buf, uint32_t size, const char *recipient) const {
 
-    uint32_t header[2] = {id, size};
+    MessageHeader header;
+    header.id = id;
+    header.size = size;
+    strncpy(header.recipient_name, recipient, sizeof(header.recipient_name));
 
     if (!send_buffer(reinterpret_cast<char*>(&header), sizeof(header)))
         return false;
@@ -138,7 +141,7 @@ bool MessageChannel::send_buffer(const char *buf, uint32_t size) const {
  * @param   max_size Maximum number of bytes that can fit into the buffer
  * @return  True on success, False on error
  */
-bool MessageChannel::receive(uint32_t &message_id, char* buf, uint32_t &size, uint32_t max_size) const {
+bool MessageChannel::receive(uint32_t &message_id, char* buf, uint32_t &size, std::string &recipient, uint32_t max_size) const {
 
     // check connection
     if (!isConnected()) {
@@ -147,7 +150,7 @@ bool MessageChannel::receive(uint32_t &message_id, char* buf, uint32_t &size, ui
     }
 
     // send the message
-    if (!receive_message(message_id, buf, size, max_size)) {
+    if (!receive_message(message_id, buf, size, recipient, max_size)) {
         DEBUG_MSG("%s: receive_message terminated, errno %d - %s", __FUNCTION__, errno, strerror(errno));
         return false;
     }
@@ -160,14 +163,15 @@ bool MessageChannel::receive(uint32_t &message_id, char* buf, uint32_t &size, ui
  * @param   max_size    Maximum number of bytes that can fit into the buffer
  * @note    Implementation detail
  */
-inline bool MessageChannel::receive_message(uint32_t &id, char* buf, uint32_t &size, uint32_t max_size) const {
-    uint32_t header[2] ;
+inline bool MessageChannel::receive_message(uint32_t &id, char* buf, uint32_t &size, std::string &recipient, uint32_t max_size) const {
+    MessageHeader header;
 
     if (!receive_buffer(reinterpret_cast<char*>(&header), sizeof(header)))
         return false;
 
-    id = header[0];
-    size = header[1];
+    id = header.id;
+    size = header.size;
+    recipient = header.recipient_name;
     assert(size <= max_size && "Received message size exceeds reception buffer size!");
 
     if (!receive_buffer(buf, size))

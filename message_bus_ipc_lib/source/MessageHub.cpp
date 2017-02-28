@@ -157,15 +157,16 @@ bool MessageHub::handleClientInSeparateThread(MessageChannel &channel) {
  */
 void* MessageHub::handleClientFunc(void* varg) {
     ClientFuncArg *arg = (ClientFuncArg*) varg;
-
     MessageChannel channel = arg->channel;
+
     uint32_t message_id;
     uint32_t size;
+    std::string recipient;
     char *data = new char[MESSAGE_BUFF_SIZE];
 
-    while (channel.receive(message_id, data, size)) {
+    while (channel.receive(message_id, data, size, recipient)) {
         DEBUG_MSG("received message with id %d, size %d", message_id, size);
-        arg->message_queue.push(channel, message_id, data, size);
+        arg->message_queue.push(channel, message_id, data, size, recipient);
     }
     DEBUG_MSG("%s", "Client disconnect.");
 
@@ -188,15 +189,19 @@ void* MessageHub::routeMessagesFunc(void* varg) {
     MessageChannel const * recipient;
     uint32_t message_id;
     uint32_t size;
+    std::string recipient_name;
     char *data = new char[MESSAGE_BUFF_SIZE];
 
+    // route messages forever
     while (true) {
-        arg->message_queue.pop(sender, message_id, data, size);
+        // get message
+        arg->message_queue.pop(sender, message_id, data, size, recipient_name);
         ThreadsafeChannelList::Iterator it = arg->channel_list.getIterator();
 
+        // route the message to proper recipients. dont send it back to sender
         while ((recipient = it.getNext()))
-            if (*recipient != sender) // dont send the message back to sender
-                recipient->send(message_id, data, size);
+            if ((*recipient != sender) && (recipient->name() == recipient_name))
+                recipient->send(message_id, data, size, ""); // dont include recipient_name; no need
     }
 
     delete[] data;

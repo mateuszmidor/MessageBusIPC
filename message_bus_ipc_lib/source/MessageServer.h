@@ -28,6 +28,7 @@ private:
     const static int MAX_AWAITING_CONNECTIONS = 10;
     int server_socket_fd;
 
+    MessageChannel prepareChannel(int socket_fd);
     bool prepareServerSocket();
     void cleanupServerSocket();
 };

@@ -34,15 +34,19 @@ MessageClient::~MessageClient() {
  * @brief   Send single message to the message hub
  * @note	Thread safe
  */
-bool MessageClient::send(uint32_t message_id, const char *data, uint32_t size) {
+bool MessageClient::send(uint32_t message_id, const char *data, uint32_t size, const char *recipient_name) {
     PThreadLockGuard lock(mutex); // only one thread can send at a time
 
-    return server_channel.send(message_id, data, size);
+    return server_channel.send(message_id, data, size, recipient_name);
 }
 
 /**
  * @name   tryConnectToMessageHub
  */
-bool MessageClient::tryConnectToMessageHub() {
-    return server_channel.connectToMessageHub();
+bool MessageClient::tryConnectToMessageHub(const char *client_name) {
+    // connect to message hub and introduce yourself rightafter
+    if (server_channel.connectToMessageHub())
+        return server_channel.send(ID_CLIENT_SAYS_HELLO, NULL, 0, client_name);
+    else
+        return false;
 }

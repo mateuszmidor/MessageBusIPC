@@ -34,7 +34,7 @@ private:
 // Definition
 //====================================================================================================
 MessageBusTermianalExample::MessageBusTermianalExample() {
-    auto thread_func = [this](){ client.initializeAndListenMemberFunc(this, &MessageBusTermianalExample::onMessage); };
+    auto thread_func = [this](){ client.initializeAndListenMemberFunc(this, &MessageBusTermianalExample::onMessage, "Terminal"); };
     std::thread t = std::thread(thread_func);
     t.detach();
     n_prints = 1;
@@ -45,7 +45,7 @@ void MessageBusTermianalExample::startInteractiveSession() {
     string s;
     do {
         getline(cin, s);
-        client.send(50, s.c_str(), s.length() + 1); // +1 for null
+        client.send(50, s.c_str(), s.length() + 1, "Terminal"); // +1 for null
     } while (s != "exit");
 }
 
