@@ -32,6 +32,9 @@ const unsigned MESSAGE_BUFF_SIZE = 1024 * 1024 * 1; // 1MB
 // socket file descriptor that is not initialized
 const int UNINITIALIZED_SOCKET_FD = -1;
 
+// Message addressed to all connected recipients
+const char ALL_CONNECTED_CLIENTS[] = "*";
+
 // Debugging messages routine
 #ifndef NDEBUG
 # define DEBUG_MSG(fmt, ...) printf(fmt "\n", __VA_ARGS__)

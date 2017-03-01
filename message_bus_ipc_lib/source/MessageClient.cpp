@@ -42,6 +42,8 @@ void MessageClient::waitForClient(const char *client_name) {
 /**
  * @name    send
  * @brief   Send single message to the message hub
+ * @param   client_name Name of the client this message should be delivered to.
+ *                      "*" means all connected clients
  * @note	Thread safe
  */
 bool MessageClient::send(uint32_t message_id, const char *data, uint32_t size, const char *client_name) {

@@ -24,7 +24,7 @@ public:
     MessageClient();
     virtual ~MessageClient();
     void waitForClient(const char *client_name);
-    bool send(uint32_t id, const char *data, uint32_t size, const char *client_name);
+    bool send(uint32_t id, const char *data, uint32_t size, const char *client_name = ALL_CONNECTED_CLIENTS);
 
     /**
      * @name    initializeAndListenMemberFunc

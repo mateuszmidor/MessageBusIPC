@@ -66,8 +66,7 @@ void runAsReceiver() {
 
     MessageClient client;
     client.initializeAndListen(callback, "receiver"); // blocking
-    printf("\nReceiver received %d messages", num_messages);
-    fflush(stdout);
+//    printf("Receiver received %d messages\n", num_messages);
 }
 
 void runAsSender(char** argv) {

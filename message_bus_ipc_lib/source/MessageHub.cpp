@@ -222,10 +222,18 @@ void* MessageHub::routeMessagesFunc(void* varg) {
         arg->message_queue.pop(sender, message_id, data, size, recipient_name);
         ThreadsafeChannelList::Iterator it = arg->channel_list.getIterator();
 
-        // route the message to proper recipients. dont send it back to sender
-        while ((recipient = it.getNext()))
-            if ((*recipient != sender) && (recipient->name() == recipient_name))
-                recipient->send(message_id, data, size, ""); // dont include recipient_name; no need
+        // broadcast
+        if (recipient_name == ALL_CONNECTED_CLIENTS) {
+            while ((recipient = it.getNext()))
+                if (*recipient != sender)
+                    recipient->send(message_id, data, size, ""); // dont include recipient_name; no need
+        }
+        // multicast
+        else {
+            while ((recipient = it.getNext()))
+                if ((*recipient != sender) && (recipient->name() == recipient_name))
+                    recipient->send(message_id, data, size, ""); // dont include recipient_name; no need
+        }
     }
 
     delete[] data;
