@@ -105,7 +105,7 @@ bool MessageServer::prepareServerSocket() {
     // prepare address struct
     sockaddr_un local;
     local.sun_family = AF_UNIX;
-    strcpy(local.sun_path, MESSAGE_HUB_SOCKET_FILENAME);
+    strncpy(local.sun_path, MESSAGE_HUB_SOCKET_FILENAME, sizeof(local.sun_path));
 
     // bind socket to address in UNIX domain
     size_t local_length = strlen(local.sun_path) + sizeof(local.sun_family);

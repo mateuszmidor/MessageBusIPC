@@ -50,7 +50,7 @@ bool MessageChannel::connectToMessageHub() {
     DEBUG_MSG("%s: connecting to MessageHub socket: %s...", __FUNCTION__, MESSAGE_HUB_SOCKET_FILENAME);
     sockaddr_un remote;
     remote.sun_family = AF_UNIX;
-    strcpy(remote.sun_path, MESSAGE_HUB_SOCKET_FILENAME);
+    strncpy(remote.sun_path, MESSAGE_HUB_SOCKET_FILENAME, sizeof(remote.sun_path));
     size_t length = strlen(remote.sun_path) + sizeof(remote.sun_family);
     if (connect(socket_fd, (sockaddr*) &remote, length) == -1) {
         close(socket_fd);  // cleanup filedescriptor
