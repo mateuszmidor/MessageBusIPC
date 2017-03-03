@@ -19,7 +19,7 @@
 using namespace std;
 using namespace messagebusipc;
 
-const int TERMINATE_RECEIVER = 999;
+const int TERMINATE_RECEIVER = ID_USER_MESSAGE_BASE;
 int num_messages = 0;
 
 class Timer {
