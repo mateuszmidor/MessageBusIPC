@@ -72,7 +72,7 @@ private:
     pthread_mutex_t send_mutex;
     ThreadsafeClientList connected_clients;
     static const int RECONNECT_DELAY_SECONDS = 3;
-    static const int WAIT_CLIENT_DELAY_MSECONDS = 100;
+    static const int WAIT_CLIENT_DELAY_USECONDS = 100000;
 
     bool tryConnectToMessageHub(const char *client_name);
 

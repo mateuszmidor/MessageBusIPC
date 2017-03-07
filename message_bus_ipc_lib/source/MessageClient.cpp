@@ -36,7 +36,7 @@ MessageClient::~MessageClient() {
 void MessageClient::waitForClient(const char *client_name) {
     // could be based on synchronization primitives but lets keep things simple :)
     while (!connected_clients.exists(client_name))
-        usleep (WAIT_CLIENT_DELAY_MSECONDS);
+        usleep (WAIT_CLIENT_DELAY_USECONDS);
 }
 
 /**
