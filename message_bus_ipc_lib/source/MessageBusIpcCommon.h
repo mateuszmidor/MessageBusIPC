@@ -16,7 +16,8 @@ namespace messagebusipc {
 
 // Message IDs. Start numbering your messages from ID_USER_MESSAGE_BASE
 enum MessageBusMessages {
-    ID_CLIENT_SAYS_HELLO = 1,                           // sent to the hub when client connects, conveys client name
+    ID_CLIENT_SAYS_HELLO = 1,                           // sent to the hub and all clients when new client connects, conveys client name
+    ID_CLIENT_SAYS_GOODBYE,                             // sent to all clients when client disconnects, conveys client name
     ID_CONNECTED_CLIENT_LIST,                           // broadcasted to all when client connects/disconnects from hub
 
     ID_USER_MESSAGE_BASE = 1000000                      // user defined messages start from this index
@@ -29,7 +30,7 @@ enum MessageBusMessages {
 const char MESSAGE_HUB_SOCKET_FILENAME[] = "/tmp/sdars_ipc_hub";
 
 // Maximum size of single message in bytes
-const unsigned MESSAGE_BUFF_SIZE = 1024 * 1024 * 1; // 1MB
+const unsigned MESSAGE_BUFF_SIZE = 1024 * 1024 * 10; // 10MB
 
 // socket file descriptor that is not initialized
 const int UNINITIALIZED_SOCKET_FD = -1;

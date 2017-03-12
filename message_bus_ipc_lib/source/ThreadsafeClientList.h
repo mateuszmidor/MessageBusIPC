@@ -22,7 +22,9 @@ public:
     ThreadsafeClientList();
     virtual ~ThreadsafeClientList();
 
-    void update(const std::string &client_names);
+    void add(const std::string &client_name);
+    void remove(const std::string &client_name);
+    void clear();
     bool exists(const std::string &client_name);
 private:
     pthread_mutex_t mutex;

@@ -19,13 +19,35 @@ ThreadsafeClientList::~ThreadsafeClientList() {
 }
 
 /**
- * @name    update
+ * @name    add
  * @note    Thread safe
  */
-void ThreadsafeClientList::update(const std::string &client_names) {
+void ThreadsafeClientList::add(const std::string &client_name) {
     PThreadLockGuard lock(mutex);
 
-    clients = client_names;
+    clients += client_name + ";";
+}
+/**
+ * @name    remove
+ * @note    Thread safe
+ */
+void ThreadsafeClientList::remove(const std::string &client_name) {
+    PThreadLockGuard lock(mutex);
+
+    std::string::size_type i = clients.find(client_name);
+
+    if (i != std::string::npos)
+       clients.erase(i, client_name.length() + 1 ); // +1 for ';'
+}
+
+/**
+ * @name    clear
+ * @note    Thread safe
+ */
+void ThreadsafeClientList::clear() {
+    PThreadLockGuard lock(mutex);
+
+    clients.clear();
 }
 
 /**
@@ -35,7 +57,7 @@ void ThreadsafeClientList::update(const std::string &client_names) {
 bool ThreadsafeClientList::exists(const std::string &client_name) {
     PThreadLockGuard lock(mutex);
 
-    return (clients.find(client_name, 0) != std::string::npos);
+    return (clients.find(client_name) != std::string::npos);
 }
 
 } /* namespace messagebusipc */

@@ -117,8 +117,8 @@ void MessageHub::startAcceptClients() {
         // 2. put it on the list so the router function knows about it
         channel_list.add(channel);
 
-        // 3. send list of connected clients to all clients
-        broadcastConnectedClientList(channel_list);
+        // 3. send ID_CLIENT_SAYS_HELLO from new to all connected clients and vice versa
+        broadcastClientConnected(channel_list, channel);
 
         // 4. handle the client in separate thread
         if (!handleClientInSeparateThread(channel))
@@ -126,25 +126,39 @@ void MessageHub::startAcceptClients() {
     }
 }
 
-void MessageHub::broadcastConnectedClientList(ThreadsafeChannelList &channel_list) {
+/**
+ * @name    broadcastClientConnected
+ * @brief   Send ID_CLIENT_SAYS_HELLO from new client to all connected clients
+ *          and from every connected client to the new client
+ */
+void MessageHub::broadcastClientConnected(ThreadsafeChannelList &channel_list, MessageChannel &connected) {
     ThreadsafeChannelList::Iterator it  = channel_list.getIterator(); // this is thread sync point
-    MessageChannel const * recipient;
-    std::vector<MessageChannel const *> clients;
+    MessageChannel const * channel;
+    const std::string &connected_name = connected.name();
+    while ((channel = it.getNext()))
+        if (*channel != connected) {
+            // new client says hello to existing client
+            channel->send(ID_CLIENT_SAYS_HELLO, connected_name.c_str(), connected_name.length() + 1, "");
 
-    // prepare client list
-    while ((recipient = it.getNext()))
-        clients.push_back(recipient);
-
-    // for each client create a list of client names excluding itself and send the list to the client
-    it.reset();
-    while ((recipient = it.getNext())) {
-        std::string client_string;
-        for (unsigned int i = 0; i < clients.size(); i++)
-            if (clients[i] != recipient)
-                client_string += clients[i]->name() + ";";
-        recipient->send(ID_CONNECTED_CLIENT_LIST, client_string.c_str(), client_string.size() + 1, "");
-    }
+            // existing client says hello to new client
+            const std::string &existing_name = channel->name();
+            connected.send(ID_CLIENT_SAYS_HELLO, existing_name.c_str(), existing_name.length() + 1, "");
+        }
 }
+
+/**
+ * @name    broadcastClientDisconnected
+ * @brief   Send ID_CLIENT_SAYS_GOODBYE to every connected client
+ */
+void MessageHub::broadcastClientDisconnected(ThreadsafeChannelList &channel_list, MessageChannel &disconnected) {
+    ThreadsafeChannelList::Iterator it  = channel_list.getIterator(); // this is thread sync point
+    MessageChannel const * channel;
+    const std::string &disconnected_name = disconnected.name();
+    while ((channel = it.getNext()))
+        if (*channel != disconnected)
+            channel->send(ID_CLIENT_SAYS_GOODBYE, disconnected_name.c_str(), disconnected_name.length() + 1, "");
+}
+
 /**
  * @name    handleClientInSeparateThread
  * @param   channel Communication channel of the connection that we want to handle
@@ -190,10 +204,10 @@ void* MessageHub::handleClientFunc(void* varg) {
         DEBUG_MSG("received message with id %d, size %d", message_id, size);
         arg->message_queue.push(channel, message_id, data, size, recipient);
     }
-    DEBUG_MSG("%s", "Client disconnect.");
+    DEBUG_MSG("%s: client disconnected: %s", __FUNCTION__, channel.name().c_str());
 
+    broadcastClientDisconnected(arg->channel_list, channel);
     arg->channel_list.removeByValue(channel);
-    broadcastConnectedClientList(arg->channel_list);
     delete[] data;
     delete arg;
 

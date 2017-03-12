@@ -55,9 +55,22 @@ void ChatClient::startInteractiveSession() {
 }
 
 bool ChatClient::onMessage(uint32_t &id, char *data, uint32_t &size) {
-    // print incoming message and return true to continue the listener work
-    printf("[%d] %s\n", curr_msg_number, data);
-    curr_msg_number++;
+    switch (id) {
+    case ID_CLIENT_SAYS_HELLO:
+        //printf("%s connected\n", data);
+        break;
+
+    case ID_CLIENT_SAYS_GOODBYE:
+        //printf("%s disconnected\n", data);
+        break;
+
+    default:
+        // print incoming message and return true to continue the listener work
+        printf("[%d] %s\n", curr_msg_number, data);
+        curr_msg_number++;
+        break;
+
+    }
     return true;
 }
 

@@ -56,7 +56,7 @@ MessageChannel MessageServer::acceptOne() {
 
     // 2. client connected, now turn socket into a channel
     MessageChannel channel = prepareChannel(client_socket_fd);
-    DEBUG_MSG("client connected: %s", channel.name().c_str());
+    DEBUG_MSG("%s: client connected: %s", __FUNCTION__, channel.name().c_str());
 
     return channel;
 }
@@ -75,7 +75,7 @@ MessageChannel MessageServer::prepareChannel(int socket_fd) {
     // 1. create a channel
     MessageChannel channel(socket_fd);
 
-    // 2. receive hello message with channel name from MessageClient
+    // 2. receive ID_CLIENT_SAYS_HELLO with channel name from MessageClient
     channel.receive(message_id, empty_buffer, size, name);
 
     // 3. setup channel name

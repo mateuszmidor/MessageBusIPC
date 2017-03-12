@@ -57,7 +57,7 @@ public:
                 auto_reconnect &= listenUntilConnectionTerminated(callback);
 
             // 2. we got here so connection is terminated; clear available client list
-            connected_clients.update("");
+            connected_clients.clear();
 
             // 3. sleep a while and maybe reconnect and listen again
             sleep(RECONNECT_DELAY_SECONDS);
@@ -88,16 +88,23 @@ private:
 
         while (server_channel.receive(message_id, message_buffer, message_size, recipient)) {
             switch (message_id) {
-            case ID_CONNECTED_CLIENT_LIST:
-                DEBUG_MSG("%s: update connected clients: [%s]", __FUNCTION__, message_buffer);
-                connected_clients.update(message_buffer);
+            case ID_CLIENT_SAYS_HELLO:
+                DEBUG_MSG("%s: client connected: %s", __FUNCTION__, message_buffer);
+                connected_clients.add(message_buffer);
+                break;
+
+            case ID_CLIENT_SAYS_GOODBYE:
+                DEBUG_MSG("%s: client disconnected: %s", __FUNCTION__, message_buffer);
+                connected_clients.remove(message_buffer);
                 break;
 
             default:
-                if (callback(message_id, message_buffer, message_size) == false) {
-                    DEBUG_MSG("%s: message callback returns false. Finish reception loop", __FUNCTION__);
-                    return false;
-                }
+                break;
+            }
+
+            if (callback(message_id, message_buffer, message_size) == false) {
+                DEBUG_MSG("%s: message callback returns false. Finish reception loop", __FUNCTION__);
+                return false;
             }
         } // while
 
