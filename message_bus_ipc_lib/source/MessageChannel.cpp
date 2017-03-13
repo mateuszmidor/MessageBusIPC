@@ -51,7 +51,9 @@ bool MessageChannel::connectToMessageHub() {
     sockaddr_un remote;
     remote.sun_family = AF_UNIX;
     strncpy(remote.sun_path, MESSAGE_HUB_SOCKET_FILENAME, sizeof(remote.sun_path));
+    remote.sun_path[sizeof(remote.sun_path)-1] = '\0';
     size_t length = strlen(remote.sun_path) + sizeof(remote.sun_family);
+    
     if (connect(socket_fd, (sockaddr*) &remote, length) == -1) {
         close(socket_fd);  // cleanup filedescriptor
         socket_fd = UNINITIALIZED_SOCKET_FD; // status: uninitialized
@@ -108,6 +110,7 @@ bool MessageChannel::send_message(uint32_t id, const char *buf, uint32_t size, c
     header.id = id;
     header.size = size;
     strncpy(header.recipient_name, recipient, sizeof(header.recipient_name));
+    header.recipient_name[sizeof(header.recipient_name)-1] = '\0';
 
     if (!send_buffer(reinterpret_cast<char*>(&header), sizeof(header)))
         return false;
@@ -125,6 +128,7 @@ bool MessageChannel::send_message(uint32_t id, const char *buf, uint32_t size, c
 bool MessageChannel::send_buffer(const char *buf, uint32_t size) const {
     uint32_t bytes_left = size;
     int num_bytes_sent;
+
     while ((bytes_left > 0) && ((num_bytes_sent = ::send(socket_fd, buf, bytes_left, MSG_NOSIGNAL)) > 0)) {
         bytes_left -= num_bytes_sent;
         buf += num_bytes_sent;

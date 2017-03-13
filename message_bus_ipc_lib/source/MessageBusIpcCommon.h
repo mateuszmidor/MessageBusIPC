@@ -18,7 +18,6 @@ namespace messagebusipc {
 enum MessageBusMessages {
     ID_CLIENT_SAYS_HELLO = 1,                           // sent to the hub and all clients when new client connects, conveys client name
     ID_CLIENT_SAYS_GOODBYE,                             // sent to all clients when client disconnects, conveys client name
-    ID_CONNECTED_CLIENT_LIST,                           // broadcasted to all when client connects/disconnects from hub
 
     ID_USER_MESSAGE_BASE = 1000000                      // user defined messages start from this index
 };
