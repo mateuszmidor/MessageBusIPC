@@ -9,6 +9,7 @@
 #define MESSAGE_BUS_IPC_LIB_SOURCE_MESSAGECLIENT_H_
 
 #include <stdint.h>
+#include <unistd.h>
 #include "PThreadLockGuard.h"
 #include "ThreadsafeClientList.h"
 #include "MessageChannel.h"
