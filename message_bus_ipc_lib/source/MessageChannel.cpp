@@ -24,7 +24,7 @@ MessageChannel::MessageChannel(int socket_fd) :
 MessageChannel::~MessageChannel() {
     // TODO: make channel a ref-counted resource and close the socket when there is no references.
     // if (isConnected())
-    //    disconnect();
+    //    shutDown();
 }
 
 /**
@@ -66,11 +66,20 @@ bool MessageChannel::connectToMessageHub() {
     return true;
 }
 
-void MessageChannel::disconnect() {
-    close(socket_fd);
-    socket_fd = UNINITIALIZED_SOCKET_FD;
+/**
+ * @name    shutDown
+ * @brief   Shut down the channel breaking any pending "receive" calls
+ */
+void MessageChannel::shutDown() {
+   shutdown(socket_fd, SHUT_RDWR);
+   close(socket_fd);
+   socket_fd = UNINITIALIZED_SOCKET_FD;
 }
 
+/**
+ * @name    isConnected
+ * @return  True if connected to the other communication endpoint
+ */
 bool MessageChannel::isConnected() const {
     return socket_fd != UNINITIALIZED_SOCKET_FD;
 }

@@ -26,6 +26,7 @@ public:
     virtual ~MessageClient();
     void waitForClient(const char *client_name);
     bool send(uint32_t id, const char *data, uint32_t size, const char *client_name = ALL_CONNECTED_CLIENTS);
+    void shutDown();
 
     /**
      * @name    initializeAndListenMemberFunc
@@ -62,12 +63,13 @@ public:
 
             // 3. sleep a while and maybe reconnect and listen again
             sleep(RECONNECT_DELAY_SECONDS);
-        } while (auto_reconnect);
+        } while (auto_reconnect && !shutting_down);
 
         DEBUG_MSG("%s: finished listening to incoming messages.", __FUNCTION__);
     }
 
 private:
+    volatile bool shutting_down;
     char *message_buffer;
     MessageChannel server_channel;
     pthread_mutex_t send_mutex;

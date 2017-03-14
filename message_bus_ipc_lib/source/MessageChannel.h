@@ -30,6 +30,7 @@ public:
     }
 
     bool connectToMessageHub();
+    void shutDown();
     bool send(uint32_t id, const char *data, uint32_t size, const char *recipient) const;
     bool receive(uint32_t &id, char *data, uint32_t &size, std::string &recipient, uint32_t max_size = MESSAGE_BUFF_SIZE) const;
     void setName(const std::string &name) { channel_name = name; }
@@ -46,7 +47,6 @@ private:
     bool receive_buffer(char* buf, uint32_t size) const;
 
     bool isConnected() const;
-    void disconnect();
 
     struct MessageHeader {
         uint32_t id;

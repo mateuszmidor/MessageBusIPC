@@ -22,6 +22,7 @@ using namespace messagebusipc;
 MessageClient::MessageClient() {
     pthread_mutex_init(&send_mutex, NULL);
     message_buffer = new char[MESSAGE_BUFF_SIZE];
+    shutting_down = false;
 }
 
 MessageClient::~MessageClient() {
@@ -50,6 +51,15 @@ bool MessageClient::send(uint32_t message_id, const char *data, uint32_t size, c
     PThreadLockGuard lock(send_mutex); // only one thread can send at a time
 
     return server_channel.send(message_id, data, size, client_name);
+}
+
+/**
+ * @name    shutDown
+ * @brief   Exit the listener loop and close the communication
+ */
+void MessageClient::shutDown() {
+    shutting_down = true;
+    server_channel.shutDown();
 }
 
 /**
