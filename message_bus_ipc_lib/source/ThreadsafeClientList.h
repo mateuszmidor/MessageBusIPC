@@ -26,6 +26,8 @@ public:
     void remove(const std::string &client_name);
     void clear();
     bool exists(const std::string &client_name);
+    std::string toString();
+
 private:
     pthread_mutex_t mutex;
     std::string clients;

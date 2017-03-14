@@ -60,4 +60,14 @@ bool ThreadsafeClientList::exists(const std::string &client_name) {
     return (clients.find(client_name) != std::string::npos);
 }
 
+/**
+ * @name    toString
+ * @brief   Return available clients in a single string
+ * @note    Thread safe
+ */
+std::string ThreadsafeClientList::toString() {
+    PThreadLockGuard lock(mutex);
+
+    return clients;
+}
 } /* namespace messagebusipc */

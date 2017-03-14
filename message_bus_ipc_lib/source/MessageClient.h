@@ -90,13 +90,13 @@ private:
         while (server_channel.receive(message_id, message_buffer, message_size, recipient)) {
             switch (message_id) {
             case ID_CLIENT_SAYS_HELLO:
-                DEBUG_MSG("%s: client connected: %s", __FUNCTION__, message_buffer);
                 connected_clients.add(message_buffer);
+                DEBUG_MSG("%s: client connected: %s. Now [%s]", __FUNCTION__, message_buffer, connected_clients.toString().c_str());
                 break;
 
             case ID_CLIENT_SAYS_GOODBYE:
-                DEBUG_MSG("%s: client disconnected: %s", __FUNCTION__, message_buffer);
                 connected_clients.remove(message_buffer);
+                DEBUG_MSG("%s: client disconnected: %s. Now [%s]", __FUNCTION__, message_buffer, connected_clients.toString().c_str());
                 break;
 
             default:
