@@ -194,6 +194,7 @@ bool MessageHub::handleClientInSeparateThread(MessageChannel &channel) {
 void* MessageHub::handleClientFunc(void* varg) {
     ClientFuncArg *arg = (ClientFuncArg*) varg;
     MessageChannel channel = arg->channel;
+    const char *sender_name = channel.name().c_str();
 
     uint32_t message_id;
     uint32_t size;
@@ -201,7 +202,9 @@ void* MessageHub::handleClientFunc(void* varg) {
     char *data = new char[MESSAGE_BUFF_SIZE];
 
     while (channel.receive(message_id, data, size, recipient)) {
-        DEBUG_MSG("received message with id %d, size %d", message_id, size);
+        const char *message_name = GetMessageName((MessageBusMessage)message_id);
+        const char *recipient_name = recipient.c_str();
+        DEBUG_MSG("received message %s (%u), %s -> %s, size %d", message_name, message_id, sender_name, recipient_name, size);
         arg->message_queue.push(channel, message_id, data, size, recipient);
     }
     DEBUG_MSG("%s: client disconnected: %s", __FUNCTION__, channel.name().c_str());
@@ -237,7 +240,7 @@ void* MessageHub::routeMessagesFunc(void* varg) {
         ThreadsafeChannelList::Iterator it = arg->channel_list.getIterator();
 
         // broadcast
-        if (recipient_name == ALL_CONNECTED_CLIENTS) {
+        if (recipient_name == MBUS_ALL_CONNECTED_CLIENTS) {
             while ((recipient = it.getNext()))
                 if (*recipient != sender)
                     recipient->send(message_id, data, size, ""); // dont include recipient_name; no need

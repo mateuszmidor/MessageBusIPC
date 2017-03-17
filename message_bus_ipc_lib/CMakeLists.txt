@@ -3,6 +3,7 @@ add_library(MessageBusIpcLib
             source/MessageHub.cpp
             source/MessageClient.cpp
             source/MessageChannel.cpp
+            source/MessageBusIpcCommon.cpp
             source/PThreadLockGuard.cpp
             source/ThreadsafeMessageQueue.cpp
             source/ThreadsafeChannelList.cpp
@@ -10,6 +11,9 @@ add_library(MessageBusIpcLib
 )
 
 target_include_directories(MessageBusIpcLib
-                            PUBLIC 
+                            PUBLIC
                                 "source"
 )
+
+find_package(Threads REQUIRED)
+target_link_libraries(MessageBusIpcLib Threads::Threads)
