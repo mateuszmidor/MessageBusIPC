@@ -16,6 +16,7 @@
 #include "MessageChannel.h"
 #include "MessageClient.h"
 
+
 using namespace messagebusipc;
 
 
@@ -47,10 +48,10 @@ void MessageClient::waitForClient(const char *client_name) {
  *                      "*" means all connected clients
  * @note	Thread safe
  */
-bool MessageClient::send(uint32_t message_id, const char *data, uint32_t size, const char *client_name) {
+bool MessageClient::send(uint32_t message_id, const void *data, uint32_t size, const char *client_name) {
     PThreadLockGuard lock(send_mutex); // only one thread can send at a time
 
-    return server_channel.send(message_id, data, size, client_name);
+    return server_channel.send(message_id, (const char*)data, size, client_name);
 }
 
 /**

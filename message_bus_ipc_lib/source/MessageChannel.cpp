@@ -176,7 +176,7 @@ bool MessageChannel::receive(uint32_t &message_id, char* buf, uint32_t &size, st
  * @param   max_size    Maximum number of bytes that can fit into the buffer
  * @note    Implementation detail
  */
-inline bool MessageChannel::receive_message(uint32_t &id, char* buf, uint32_t &size, std::string &recipient, uint32_t max_size) const {
+bool MessageChannel::receive_message(uint32_t &id, char* buf, uint32_t &size, std::string &recipient, uint32_t max_size) const {
     MessageHeader header;
 
     if (!receive_buffer(reinterpret_cast<char*>(&header), sizeof(header)))
@@ -185,7 +185,11 @@ inline bool MessageChannel::receive_message(uint32_t &id, char* buf, uint32_t &s
     id = header.id;
     size = header.size;
     recipient = header.recipient_name;
-    assert(size <= max_size && "Received message size exceeds reception buffer size!");
+
+    if (size > max_size) {
+        DEBUG_MSG("Too big message received, id: %d, size: %d (max %d), %s -> %s", id, size, max_size, channel_name.c_str(), recipient.c_str());
+        return false;
+    }
 
     if (!receive_buffer(buf, size))
         return false;

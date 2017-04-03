@@ -25,7 +25,7 @@ public:
     MessageClient();
     virtual ~MessageClient();
     void waitForClient(const char *client_name);
-    bool send(uint32_t id, const char *data, uint32_t size, const char *client_name = MBUS_ALL_CONNECTED_CLIENTS);
+    bool send(uint32_t id, const void *data, uint32_t size, const char *client_name = MBUS_ALL_CONNECTED_CLIENTS);
     void shutDown();
 
     /**
@@ -58,8 +58,9 @@ public:
             if (tryConnectToMessageHub(client_name))
                 auto_reconnect &= listenUntilConnectionTerminated(callback);
 
-            // 2. we got here so connection is terminated; clear available client list
+            // 2. we got here so connection is terminated; clear available client list and reinitialize the message channel
             connected_clients.clear();
+            server_channel = MessageChannel();
 
             // 3. sleep a while and maybe reconnect and listen again
             sleep(RECONNECT_DELAY_SECONDS);
@@ -91,15 +92,19 @@ private:
 
         while (server_channel.receive(message_id, message_buffer, message_size, recipient)) {
             switch (message_id) {
-            case ID_CLIENT_SAYS_HELLO:
+            case ID_CLIENT_SAYS_HELLO: {
+                message_buffer[message_size] = '\0';
                 connected_clients.add(message_buffer);
                 DEBUG_MSG("%s: client connected: %s. Now [%s]", __FUNCTION__, message_buffer, connected_clients.toString().c_str());
                 break;
+            }
 
-            case ID_CLIENT_SAYS_GOODBYE:
+            case ID_CLIENT_SAYS_GOODBYE: {
+                message_buffer[message_size] = '\0';
                 connected_clients.remove(message_buffer);
                 DEBUG_MSG("%s: client disconnected: %s. Now [%s]", __FUNCTION__, message_buffer, connected_clients.toString().c_str());
                 break;
+            }
 
             default:
                 break;

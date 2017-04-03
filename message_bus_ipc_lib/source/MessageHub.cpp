@@ -205,12 +205,14 @@ void* MessageHub::handleClientFunc(void* varg) {
         const char *message_name = GetMessageName((MessageBusMessage)message_id);
         const char *recipient_name = recipient.c_str();
         DEBUG_MSG("received message %s (%u), %s -> %s, size %d", message_name, message_id, sender_name, recipient_name, size);
+        (void)sender_name; (void)message_name; (void)recipient_name; // silent 'unused variable' warning
         arg->message_queue.push(channel, message_id, data, size, recipient);
     }
     DEBUG_MSG("%s: client disconnected: %s", __FUNCTION__, channel.name().c_str());
 
     broadcastClientDisconnected(arg->channel_list, channel);
     arg->channel_list.removeByValue(channel);
+    channel.shutDown(); // make sure the other side knows we are not listening anymore
     delete[] data;
     delete arg;
 

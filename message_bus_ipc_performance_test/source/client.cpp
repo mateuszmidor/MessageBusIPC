@@ -19,7 +19,8 @@
 using namespace std;
 using namespace messagebusipc;
 
-const int TERMINATE_RECEIVER = ID_USER_MESSAGE_BASE;
+const int TERMINATE_RECEIVER = ID_USER_MESSAGE_BASE + 50;
+const int TEST_MESSAGE = ID_USER_MESSAGE_BASE + 51;
 int num_messages = 0;
 
 class Timer {
@@ -44,7 +45,9 @@ bool callback(uint32_t &id, char *data, uint32_t &size) {
     if (id == TERMINATE_RECEIVER)
         return false;
 
-    num_messages++;
+    if (id == TEST_MESSAGE)
+        num_messages++;
+
     return true;
 }
 
@@ -52,7 +55,7 @@ void sendBunchOfMessages(MessageClient& client, int num_messages, int msg_size_i
     char *data = new char[msg_size_in_kb * 1024];
 
     for (int i = 0; i < num_messages; i++)
-        client.send(50, data, msg_size_in_kb * 1024, "receiver");
+        client.send(TEST_MESSAGE, data, msg_size_in_kb * 1024, "receiver");
 
     // terminate clients
     client.send(TERMINATE_RECEIVER, nullptr, 0, "receiver");
@@ -84,6 +87,7 @@ void runAsSender(char** argv) {
     timer.reset();
     sendBunchOfMessages(client, num_messages, message_size_in_kb);
     double elapsed = timer.elapsed();
+
 
     printf("*********************************************************\n");
     printf("%d messages of %dKB transmitted in %f seconds\n", num_messages, message_size_in_kb, elapsed);
